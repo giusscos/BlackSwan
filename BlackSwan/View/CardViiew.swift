@@ -12,20 +12,23 @@ struct CardViiew: View {
     
     var body: some View {
         RoundedRectangle(cornerRadius: 24)
-            .foregroundStyle(RadialGradient(colors: [.clear, .primary], center: .topLeading, startRadius: 10, endRadius: 700))
-            .frame(maxHeight: 600)
+            .foregroundStyle(RadialGradient(colors: [.secondary, .primary], center: .topLeading, startRadius: 10, endRadius: 700))
+            .frame(maxHeight: 500)
             .overlay {
-                VStack {
+                VStack(alignment: .leading) {
                     Text(item.title)
                         .font(.largeTitle)
                         .fontWeight(.bold)
                     
                     Text(item.text)
                         .font(.headline)
+                        .multilineTextAlignment(.leading)
                 }
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
-            .foregroundStyle(.white)
             .padding()
+            .foregroundStyle(.white)
     }
 }
 

@@ -69,25 +69,7 @@ struct AddSwanView: View {
                 .disabled(title.isEmpty && text.isEmpty)
             }
             .padding()
-            //            .overlay(alignment: .bottom, content: {
-            //                Color.clear
-            //                    .background(.thickMaterial)
-            //                    .frame(maxWidth: .infinity)
-            //                    .mask(
-            //                        LinearGradient(
-            //                            gradient: Gradient(colors: [.black, .black, .clear, .clear, .clear, .clear, .clear, .clear]),
-            //                            startPoint: .bottom,
-            //                            endPoint: .top
-            //                        )
-            //                    )
-            //
-            //            })
             .toolbar {
-                //                ToolbarItem(placement: .topBarLeading) {
-                //                    Text(Date(), format: Date.FormatStyle(date: .abbreviated, time: .shortened))
-                //                        .fontWeight(.semibold)
-                //                }
-                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         dismiss()

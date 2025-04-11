@@ -23,11 +23,13 @@ struct ContentView: View {
                         LazyHStack {
                             ForEach(swans) { item in
                                 NavigationLink {
-                                    
+                                    SwanDetailsView(swan: item)
+                                        .navigationTransition(.zoom(sourceID: item.id, in: namespace))
+
                                 } label: {
                                     CardViiew(item: item)
                                         .frame(maxHeight: .infinity, alignment: .center)
-                                        .matchedTransitionSource(id: item, in: namespace)
+                                        .matchedTransitionSource(id: item.id, in: namespace)
                                         .scrollTransition(
                                             axis: .horizontal
                                         ) { content, phase in
@@ -47,8 +49,8 @@ struct ContentView: View {
                     .scrollTargetBehavior(.viewAligned)
                 } else {
                     RoundedRectangle(cornerRadius: 24)
-                        .foregroundStyle(RadialGradient(colors: [.clear, .primary], center: .topLeading, startRadius: 10, endRadius: 700))
-                        .frame(maxHeight: 600)
+                        .foregroundStyle(RadialGradient(colors: [.secondary, .primary], center: .topLeading, startRadius: 10, endRadius: 700))
+                        .frame(maxHeight: 500)
                         .overlay {
                             VStack {
                                 Text("No contents yet")
@@ -59,8 +61,8 @@ struct ContentView: View {
                                     .font(.headline)
                                     .multilineTextAlignment(.center)
                             }
-                            .foregroundStyle(.white)
                             .padding()
+                            .foregroundStyle(.white)
                         }
                         .padding()
                 }
@@ -71,14 +73,14 @@ struct ContentView: View {
                     displayAddSwanSheet = true
                 } label: {
                     Label("Add", systemImage: "plus")
-                        .labelStyle(.titleOnly)
+                        .labelStyle(.iconOnly)
                 }
-                .font(.headline)
+                .font(.title3)
+                .fontWeight(.semibold)
                 .foregroundStyle(.background)
-                .padding(.horizontal)
-                .padding(.vertical, 8)
+                .padding()
                 .background(.primary)
-                .clipShape(Capsule())
+                .clipShape(Circle())
             })
             .fullScreenCover(isPresented: $displayAddSwanSheet) {
                 AddSwanView()

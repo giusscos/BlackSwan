@@ -10,11 +10,13 @@ import SwiftData
 
 @Model
 final class Swan {
+    var id: UUID = UUID()
     var title: String = ""
     var text: String = ""
     var timestamp: Date = Date()
     
-    init(title: String, text: String, timestamp: Date = Date()) {
+    init(id: UUID = UUID(), title: String, text: String, timestamp: Date = Date()) {
+        self.id = id
         self.title = title
         self.text = text
         self.timestamp = timestamp
