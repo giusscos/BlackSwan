@@ -12,7 +12,7 @@ import SwiftData
 struct BlackSwanApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Swan.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -26,6 +26,9 @@ struct BlackSwanApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear() {
+                    UITextField.appearance().clearButtonMode = .whileEditing
+                }
         }
         .modelContainer(sharedModelContainer)
     }
