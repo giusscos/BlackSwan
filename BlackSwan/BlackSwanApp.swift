@@ -10,6 +10,9 @@ import SwiftData
 
 @main
 struct BlackSwanApp: App {
+    // Create the ThemeManager as a StateObject
+    @StateObject private var themeManager = ThemeManager()
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Swan.self,
@@ -26,6 +29,8 @@ struct BlackSwanApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                // Inject the ThemeManager into the environment
+                .environmentObject(themeManager)
                 .onAppear() {
                     UITextField.appearance().clearButtonMode = .whileEditing
                 }

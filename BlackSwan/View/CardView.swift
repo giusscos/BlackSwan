@@ -1,5 +1,5 @@
 //
-//  CardViiew.swift
+//  CardView.swift
 //  BlackSwan
 //
 //  Created by Giuseppe Cosenza on 11/04/25.
@@ -7,20 +7,22 @@
 
 import SwiftUI
 
-struct CardViiew: View {
-    var item: Swan = Swan(title: "Test", text: "Black Swan")
+struct CardView: View {
+    @EnvironmentObject var themeManager: ThemeManager
+    
+    var swan: Swan
     
     var body: some View {
         RoundedRectangle(cornerRadius: 24)
-            .foregroundStyle(RadialGradient(colors: [.secondary, .primary], center: .topLeading, startRadius: 10, endRadius: 700))
+            .foregroundStyle(themeManager.gradient(for: swan))
             .frame(maxHeight: 500)
             .overlay {
                 VStack(alignment: .leading) {
-                    Text(item.title)
+                    Text(swan.classification.displayString)
                         .font(.largeTitle)
                         .fontWeight(.bold)
                     
-                    Text(item.text)
+                    Text(swan.text)
                         .font(.headline)
                         .multilineTextAlignment(.leading)
                 }
@@ -33,6 +35,7 @@ struct CardViiew: View {
 }
 
 #Preview {
-    CardViiew()
+    CardView(swan: Swan(text: "Black Swan"))
+        .environmentObject(ThemeManager())
         .padding()
 }

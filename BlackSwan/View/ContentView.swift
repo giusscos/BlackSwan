@@ -10,11 +10,13 @@ import SwiftData
 
 struct ContentView: View {
     @Namespace var namespace
+    @EnvironmentObject var themeManager: ThemeManager
     
     @Query private var swans: [Swan]
     
     @State private var displayAddSwanSheet: Bool = false
-    
+    @State private var showCustomColorPicker = false
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -25,9 +27,8 @@ struct ContentView: View {
                                 NavigationLink {
                                     SwanDetailsView(swan: item)
                                         .navigationTransition(.zoom(sourceID: item.id, in: namespace))
-
                                 } label: {
-                                    CardViiew(item: item)
+                                    CardView(swan: item)
                                         .frame(maxHeight: .infinity, alignment: .center)
                                         .matchedTransitionSource(id: item.id, in: namespace)
                                         .scrollTransition(
@@ -41,6 +42,7 @@ struct ContentView: View {
                                         }
                                         .containerRelativeFrame(.horizontal)
                                 }
+                                .buttonStyle(.plain)
                             }
                         }
                         .scrollTargetLayout()
@@ -49,7 +51,7 @@ struct ContentView: View {
                     .scrollTargetBehavior(.viewAligned)
                 } else {
                     RoundedRectangle(cornerRadius: 24)
-                        .foregroundStyle(RadialGradient(colors: [.secondary, .primary], center: .topLeading, startRadius: 10, endRadius: 700))
+                        .foregroundStyle(themeManager.gradient())
                         .frame(maxHeight: 500)
                         .overlay {
                             VStack {
@@ -82,8 +84,35 @@ struct ContentView: View {
                 .background(.primary)
                 .clipShape(Circle())
             })
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Picker("Theme", selection: $themeManager.selectedTheme) {
+                            ForEach(ColorThemePreference.allCases) { theme in
+                                Text(theme.displayName).tag(theme)
+                            }
+                        }
+                        
+                        if themeManager.selectedTheme == .custom {
+                            Divider()
+                            Button("Choose Custom Colors") {
+                                showCustomColorPicker = true
+                            }
+                        }
+                    } label: {
+                        Label("Appearance", systemImage: "paintbrush")
+                    }
+                }
+            }
             .fullScreenCover(isPresented: $displayAddSwanSheet) {
                 AddSwanView()
+            }
+            .sheet(isPresented: $showCustomColorPicker) {
+                CustomThemeSliderPickerView(
+                    primaryColor: $themeManager.customPrimaryColor,
+                    secondaryColor: $themeManager.customSecondaryColor
+                )
+                .environmentObject(themeManager)
             }
         }
     }
@@ -92,4 +121,6 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .modelContainer(for: Swan.self, inMemory: true)
+        .environmentObject(ThemeManager())
 }
+

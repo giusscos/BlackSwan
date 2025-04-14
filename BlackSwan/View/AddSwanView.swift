@@ -5,32 +5,21 @@
 //  Created by Giuseppe Cosenza on 11/04/25.
 //
 
+import CoreML
 import SwiftUI
 import SwiftData
 
 struct AddSwanView: View {
-    enum Field: Hashable {
-        case title
-        case text
-    }
-    
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    
-    @State var title: String = ""
+        
     @State var text: String = ""
-    
-    @FocusState private var focusedField: Field?
+    @State var probability: Int = 50
+    @State var classificationResult: String = ""
     
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading) {
-                TextField("Title", text: $title)
-                    .lineLimit(1)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .focused($focusedField, equals: .title)
-                
                 TextEditor(text: $text)
                     .font(.title3)
                     .fontWeight(.medium)
@@ -46,16 +35,9 @@ struct AddSwanView: View {
                         }
                     }
                     .padding(.vertical)
-                    .focused($focusedField, equals: .text)
                 
                 Button {
-                    if title.isEmpty {
-                        focusedField = .title
-                    } else if text.isEmpty {
-                        focusedField = .text
-                    } else {
-                        addSwan(title: title, text: text)
-                    }
+                    addSwan(text: text)
                 } label: {
                     Label("Save", systemImage: "square.and.arrow.up")
                         .labelStyle(.titleOnly)
@@ -66,7 +48,7 @@ struct AddSwanView: View {
                 .foregroundStyle(.background)
                 .background(text.isEmpty ? .secondary : .primary)
                 .clipShape(Capsule())
-                .disabled(title.isEmpty && text.isEmpty)
+                .disabled(text.isEmpty)
             }
             .padding()
             .toolbar {
@@ -74,35 +56,48 @@ struct AddSwanView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .fontWeight(.semibold)
-                            .font(.title)
-                            .tint(.primary)
+                        Label("Close", systemImage: "xmark.circle.fill")
                     }
-                }
-                
-                ToolbarItem(placement: .keyboard) {
-                    Button {
-                        focusedField = nil
-                    } label: {
-                        Text("Done")
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+                    .tint(.primary)
                 }
             }
         }
     }
     
-    func addSwan(title: String, text: String) {
-        if title.isEmpty && text.isEmpty { return }
+    func addSwan(text: String) {
+        if text.isEmpty { return }
+                
+        let newSwan = Swan(text: text, timestamp: Date())
         
-        let newSwan = Swan(title: title, text: text, timestamp: Date())
+        calculateProbability(text)
+
+        newSwan.timestamp = Date()
         
+        newSwan.probability = probability
+        
+        newSwan.classification = SwanClassification(rawValue: classificationResult) ?? .deliberate
+
         modelContext.insert(newSwan)
         
         dismiss()
+    }
+    
+    func calculateProbability(_ inputText: String) {
+        do {
+            let config = MLModelConfiguration()
+
+            let modelText = try BlackSwanTextClassifier(configuration: config)
+            
+            let modelTabular = try BlackSwanTabularClassifier(configuration: config)
+            
+            let resultText = try modelText.prediction(text: inputText)
+            let resultTabular = try modelTabular.prediction(text: inputText)
+            
+            classificationResult = resultText.label
+            probability = Int(resultTabular.probability)
+        } catch {
+            print(error)
+        }
     }
 }
 
