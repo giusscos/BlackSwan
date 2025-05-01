@@ -1,3 +1,10 @@
+//
+//  CustomThemeSliderPickerView.swift
+//  BlackSwan
+//
+//  Created by Giuseppe Cosenza on 11/04/25.
+//
+
 import SwiftUI
 
 struct CustomThemeSliderPickerView: View {

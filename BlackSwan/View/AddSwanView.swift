@@ -69,34 +69,27 @@ struct AddSwanView: View {
                 
         let newSwan = Swan(text: text, timestamp: Date())
         
-        calculateProbability(text)
-
+        let result = calculateProbability(text)
+        
         newSwan.timestamp = Date()
         
-        newSwan.probability = probability
-        
-        newSwan.classification = SwanClassification(rawValue: classificationResult) ?? .deliberate
+        newSwan.classification = SwanClassification(rawValue: result ?? "") ?? .deliberate
 
         modelContext.insert(newSwan)
         
         dismiss()
     }
     
-    func calculateProbability(_ inputText: String) {
+    func calculateProbability(_ inputText: String) -> String? {
         do {
             let config = MLModelConfiguration()
-
-            let modelText = try BlackSwanTextClassifier(configuration: config)
+            let model = try BlackSwanV250000Finance(configuration: config)
+            let result = try model.prediction(text: inputText)
             
-            let modelTabular = try BlackSwanTabularClassifier(configuration: config)
-            
-            let resultText = try modelText.prediction(text: inputText)
-            let resultTabular = try modelTabular.prediction(text: inputText)
-            
-            classificationResult = resultText.label
-            probability = Int(resultTabular.probability)
+            return result.label
         } catch {
-            print(error)
+            print("Error calculating probability: \(error)")
+            return nil
         }
     }
 }

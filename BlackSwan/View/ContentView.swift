@@ -11,15 +11,22 @@ import SwiftData
 struct ContentView: View {
     @Namespace var namespace
     @EnvironmentObject var themeManager: ThemeManager
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     
-    @Query private var swans: [Swan]
+    @Query(sort: \Swan.timestamp, order: .reverse) private var swans: [Swan]
     
     @State private var displayAddSwanSheet: Bool = false
     @State private var showCustomColorPicker = false
+    @State private var showOnboarding = false
 
     var body: some View {
         NavigationStack {
             VStack {
+                Text("This app can make mistake")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(8)
+                
                 if !swans.isEmpty {
                     ScrollView(.horizontal) {
                         LazyHStack {
@@ -35,9 +42,9 @@ struct ContentView: View {
                                             axis: .horizontal
                                         ) { content, phase in
                                             content
-                                                .rotationEffect(.degrees(phase.value * 3.5))
-                                                .scaleEffect(phase.isIdentity ? 1 : 0.95)
-                                                .offset(y: phase.isIdentity ? 0 : 50)
+                                                .rotationEffect(.degrees(phase.value * 8))
+                                                .scaleEffect(phase.isIdentity ? 1 : 0.8)
+                                                .offset(y: phase.isIdentity ? 0 : 40)
                                                 .blur(radius: phase.isIdentity ? 0 : 3)
                                         }
                                         .containerRelativeFrame(.horizontal)
@@ -100,8 +107,9 @@ struct ContentView: View {
                             }
                         }
                     } label: {
-                        Label("Appearance", systemImage: "paintbrush")
+                        Label("Appearance", systemImage: "paintpalette")
                     }
+                    .tint(.primary)
                 }
             }
             .fullScreenCover(isPresented: $displayAddSwanSheet) {
@@ -113,6 +121,15 @@ struct ContentView: View {
                     secondaryColor: $themeManager.customSecondaryColor
                 )
                 .environmentObject(themeManager)
+            }
+            .sheet(isPresented: $showOnboarding) {
+                OnboardingView(isPresented: $showOnboarding)
+                    .environmentObject(themeManager)
+            }
+            .onAppear {
+                if !hasCompletedOnboarding {
+                    showOnboarding = true
+                }
             }
         }
     }

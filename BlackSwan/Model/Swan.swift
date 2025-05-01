@@ -10,7 +10,7 @@ import SwiftData
 import SwiftUI
 
 enum SwanClassification: String, Codable {
-    case blackSwan = "black_swan"
+    case blackSwan = "blackSwan"
     case deliberate = "deliberate"
 
     var displayString: String {
@@ -26,7 +26,7 @@ enum SwanClassification: String, Codable {
     var primaryColor: Color {
         switch self {
         case .blackSwan:
-            return .black // Or a very dark gray
+            return Color.red // Or a very dark gray
         case .deliberate:
             return Color.blue // Or another distinct color
         }
@@ -35,9 +35,9 @@ enum SwanClassification: String, Codable {
     var secondaryColor: Color {
         switch self {
         case .blackSwan:
-            return Color(white: 0.15) // Dark gray
+            return Color.black // Dark gray
         case .deliberate:
-            return Color.cyan // Lighter blue/teal
+            return Color.mint // Lighter blue/teal
         }
     }
 }

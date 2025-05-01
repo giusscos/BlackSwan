@@ -7,16 +7,20 @@
 
 import SwiftUI
 import SwiftData
+import CoreML
 
 struct EditSwanView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
 
     enum Field: Hashable {
         case text
     }
 
     @Bindable var swan: Swan
-
+    @State var probability: Int = 50
+    @State var classificationResult: String = ""
+    
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading) {
@@ -68,8 +72,25 @@ struct EditSwanView: View {
 
     func saveChanges() {
         if swan.text.isEmpty { return }
-        swan.timestamp = Date()
+        
+        let result = calculateProbability(swan.text)
+        
+        swan.classification = SwanClassification(rawValue: result ?? "") ?? .deliberate
+        
         dismiss()
+    }
+    
+    func calculateProbability(_ inputText: String) -> String? {
+        do {
+            let config = MLModelConfiguration()
+            let model = try BlackSwanV250000Finance(configuration: config)
+            let result = try model.prediction(text: inputText)
+            
+            return result.label
+        } catch {
+            print("Error calculating probability: \(error)")
+            return nil
+        }
     }
 }
 
