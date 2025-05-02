@@ -64,7 +64,6 @@ class ThemeManager: ObservableObject {
     }
 
     // --- Helper functions for Color <-> Data conversion ---
-    // Moved here and made private
     private func data(from color: Color) -> Data? {
         let uiColor = UIColor(color)
         // Use secure coding

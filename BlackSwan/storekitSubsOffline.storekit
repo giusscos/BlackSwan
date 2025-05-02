@@ -1,0 +1,169 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "BA408507",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "3.99",
+      "familyShareable" : false,
+      "internalID" : "A6184181",
+      "localizations" : [
+        {
+          "description" : "Lifetime app access",
+          "displayName" : "Black Swan Access",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.giusscos.appAccess",
+      "referenceName" : "App access",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "9591B6AF",
+      "localizations" : [
+        {
+          "description" : "Get unlimited access to all features with our flexible subscription plans",
+          "displayName" : "Unlock Full Access",
+          "locale" : "en_US"
+        }
+      ],
+      "name" : "Unlock Full Access",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "1.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "51E90390",
+          "introductoryOffer" : {
+            "internalID" : "F400720C",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P3D"
+          },
+          "localizations" : [
+            {
+              "description" : "Full Access to the app",
+              "displayName" : "1 Month Full Access",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "bs_199_1m_3d",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "BlackSwan Monthly $1.99, 3 Days free",
+          "subscriptionGroupID" : "9591B6AF",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "19.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "F2E21E4E",
+          "introductoryOffer" : {
+            "internalID" : "238F4BC6",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "Full Access to the app",
+              "displayName" : "1 Year Full Access",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "bs_1999_1y_1w",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "BlackSwan Yearly $19.99, 1 Week free",
+          "subscriptionGroupID" : "9591B6AF",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 import SwiftUI
 
-enum SwanClassification: String, Codable {
+enum SwanClassification: String, Codable, CaseIterable {
     case blackSwan = "blackSwan"
     case deliberate = "deliberate"
 

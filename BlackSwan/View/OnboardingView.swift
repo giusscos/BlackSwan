@@ -6,10 +6,11 @@
 //
 
 import SwiftUI
+import StoreKit
 
 struct OnboardingView: View {
     @EnvironmentObject var themeManager: ThemeManager
-    @Binding var isPresented: Bool
+    
     @State private var currentPage = 0
     
     private let pages = [
@@ -32,6 +33,11 @@ struct OnboardingView: View {
             title: "Customize Your Experience",
             description: "Personalize the app's appearance with different themes and colors.",
             systemImage: "paintpalette.fill"
+        ),
+        OnboardingPage(
+            title: "Unlock Full Access",
+            description: "Get unlimited access to all features with our flexible subscription plans.",
+            systemImage: "lock.open.fill"
         )
     ]
     
@@ -39,32 +45,47 @@ struct OnboardingView: View {
         VStack {
             TabView(selection: $currentPage) {
                 ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
-                    OnboardingPageView(page: page)
-                        .tag(index)
+                    if index == pages.count - 1 {
+                        SubscriptionStoreView(groupID: Store().groupId)
+                            .subscriptionStoreControlStyle(.compactPicker, placement: .automatic)
+                            .subscriptionStoreButtonLabel(.multiline)
+                            .storeButton(.visible, for: .restorePurchases)
+                            .subscriptionStorePolicyDestination(url: URL(string: "https://giusscos.it/privacy")!, for: .privacyPolicy)
+                            .subscriptionStorePolicyDestination(url: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!, for: .termsOfService)
+                            .tint(.primary)
+                            .padding(.vertical, 48)
+                            .padding(.horizontal)
+                            .tag(index)
+                    } else {
+                        OnboardingPageView(page: page)
+                            .padding()
+                            .tag(index)
+                    }
                 }
             }
             .tabViewStyle(.page)
             .indexViewStyle(.page(backgroundDisplayMode: .always))
             
-            Button {
-                if currentPage < pages.count - 1 {
+            if currentPage < pages.count - 1 {
+                Button {
                     withAnimation {
-                        currentPage += 1
+                        if currentPage < pages.count - 1 {
+                            currentPage += 1
+                        }
                     }
-                } else {
-                    isPresented = false
+                } label: {
+                    Text(currentPage == pages.count - 2 ? "Get Started" : "Next")
+                        .font(.headline)
                 }
-            } label: {
-                Text(currentPage == pages.count - 1 ? "Get Started" : "Next")
-                    .font(.headline)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .foregroundStyle(.background)
+                .background(.primary)
+                .clipShape(Capsule())
+                .frame(maxWidth: 400, alignment: .center)
+                .padding()
             }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .foregroundStyle(.background)
-            .background(.primary)
-            .clipShape(Capsule())
         }
-        .padding()
         .interactiveDismissDisabled()
     }
 }
@@ -106,10 +127,11 @@ struct OnboardingPageView: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal)
         }
+        .frame(maxWidth: 400, alignment: .center)
     }
 }
 
 #Preview {
-    OnboardingView(isPresented: .constant(true))
+    OnboardingView()
         .environmentObject(ThemeManager())
 } 
