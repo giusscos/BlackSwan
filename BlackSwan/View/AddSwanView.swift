@@ -41,14 +41,15 @@ struct AddSwanView: View {
                 } label: {
                     Label("Save", systemImage: "square.and.arrow.up")
                         .labelStyle(.titleOnly)
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .font(.headline)
+                        .foregroundStyle(.background)
                 }
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .center)
-                .font(.headline)
-                .foregroundStyle(.background)
                 .background(text.isEmpty ? .secondary : .primary)
                 .clipShape(Capsule())
                 .disabled(text.isEmpty)
+                .frame(maxWidth: 400, alignment: .center)
             }
             .padding()
             .toolbar {

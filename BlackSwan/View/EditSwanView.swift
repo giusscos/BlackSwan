@@ -45,14 +45,15 @@ struct EditSwanView: View {
                 } label: {
                     Label("Save Changes", systemImage: "square.and.arrow.down")
                         .labelStyle(.titleOnly)
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .font(.headline)
+                        .foregroundStyle(.background)
                 }
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .center)
-                .font(.headline)
-                .foregroundStyle(.background)
                 .background(swan.text.isEmpty ? .secondary : .primary)
                 .clipShape(Capsule())
                 .disabled(swan.text.isEmpty)
+                .frame(maxWidth: 400, alignment: .center)
             }
             .padding()
             .navigationTitle("Edit Swan")

@@ -15,11 +15,6 @@ struct OnboardingView: View {
     
     private let pages = [
         OnboardingPage(
-            title: "Welcome to BlackSwan",
-            description: "A place where you can describe and get aware of unexpected events.",
-            systemImage: "AppIcon"
-        ),
-        OnboardingPage(
             title: "Add Your Events",
             description: "Tap the + button to add new events. Each event will be automatically analyzed.",
             systemImage: "plus.circle.fill"
@@ -33,59 +28,29 @@ struct OnboardingView: View {
             title: "Customize Your Experience",
             description: "Personalize the app's appearance with different themes and colors.",
             systemImage: "paintpalette.fill"
-        ),
-        OnboardingPage(
-            title: "Unlock Full Access",
-            description: "Get unlimited access to all features with our flexible subscription plans.",
-            systemImage: "lock.open.fill"
         )
     ]
     
     var body: some View {
-        VStack {
-            TabView(selection: $currentPage) {
-                ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
-                    if index == pages.count - 1 {
-                        SubscriptionStoreView(groupID: Store().groupId)
-                            .subscriptionStoreControlStyle(.compactPicker, placement: .automatic)
-                            .subscriptionStoreButtonLabel(.multiline)
-                            .storeButton(.visible, for: .restorePurchases)
-                            .subscriptionStorePolicyDestination(url: URL(string: "https://giusscos.it/privacy")!, for: .privacyPolicy)
-                            .subscriptionStorePolicyDestination(url: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!, for: .termsOfService)
-                            .tint(.primary)
-                            .padding(.vertical, 48)
-                            .padding(.horizontal)
-                            .tag(index)
-                    } else {
+        SubscriptionStoreView(groupID: Store().groupId) {
+            VStack {
+                TabView(selection: $currentPage) {
+                    ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
                         OnboardingPageView(page: page)
                             .padding()
                             .tag(index)
                     }
                 }
-            }
-            .tabViewStyle(.page)
-            .indexViewStyle(.page(backgroundDisplayMode: .always))
-            
-            if currentPage < pages.count - 1 {
-                Button {
-                    withAnimation {
-                        if currentPage < pages.count - 1 {
-                            currentPage += 1
-                        }
-                    }
-                } label: {
-                    Text(currentPage == pages.count - 2 ? "Get Started" : "Next")
-                        .font(.headline)
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .foregroundStyle(.background)
-                .background(.primary)
-                .clipShape(Capsule())
-                .frame(maxWidth: 400, alignment: .center)
-                .padding()
+                .tabViewStyle(.page)
+                .indexViewStyle(.page(backgroundDisplayMode: .always))
             }
         }
+        .subscriptionStoreControlStyle(.compactPicker, placement: .automatic)
+        .subscriptionStoreButtonLabel(.multiline)
+        .storeButton(.visible, for: .restorePurchases)
+        .subscriptionStorePolicyDestination(url: URL(string: "https://giusscos.it/privacy")!, for: .privacyPolicy)
+        .subscriptionStorePolicyDestination(url: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!, for: .termsOfService)
+        .tint(.primary)
         .interactiveDismissDisabled()
     }
 }
