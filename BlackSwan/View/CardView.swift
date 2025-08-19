@@ -8,13 +8,11 @@
 import SwiftUI
 
 struct CardView: View {
-    @EnvironmentObject var themeManager: ThemeManager
-    
     var swan: Swan
     
     var body: some View {
-        RoundedRectangle(cornerRadius: 24)
-            .foregroundStyle(themeManager.gradient(for: swan))
+        RoundedRectangle(cornerRadius: 32)
+            .foregroundStyle(.ultraThinMaterial)
             .frame(maxHeight: 500)
             .overlay {
                 VStack(alignment: .leading) {
@@ -30,12 +28,9 @@ struct CardView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
             .padding()
-            .foregroundStyle(.white)
     }
 }
 
 #Preview {
     CardView(swan: Swan(text: "Black Swan"))
-        .environmentObject(ThemeManager())
-        .padding()
 }

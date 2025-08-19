@@ -21,25 +21,6 @@ enum SwanClassification: String, Codable, CaseIterable {
             return "Deliberate"
         }
     }
-
-    // Define colors for each classification
-    var primaryColor: Color {
-        switch self {
-        case .blackSwan:
-            return Color.red // Or a very dark gray
-        case .deliberate:
-            return Color.blue // Or another distinct color
-        }
-    }
-
-    var secondaryColor: Color {
-        switch self {
-        case .blackSwan:
-            return Color.black // Dark gray
-        case .deliberate:
-            return Color.mint // Lighter blue/teal
-        }
-    }
 }
 
 @Model
@@ -51,9 +32,9 @@ final class Swan {
     var probability: Int = 50
     var classification: SwanClassification = SwanClassification.deliberate
     
-    init(id: UUID = UUID(), text: String, timestamp: Date = Date()) {
-        self.id = id
+    init(text: String) {
+        self.id = UUID()
         self.text = text
-        self.timestamp = timestamp
+        self.timestamp = Date()
     }
 }

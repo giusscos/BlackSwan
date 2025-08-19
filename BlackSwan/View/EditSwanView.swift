@@ -39,33 +39,30 @@ struct EditSwanView: View {
                         }
                     }
                     .padding(.vertical)
-
-                Button {
-                    saveChanges()
-                } label: {
-                    Label("Save Changes", systemImage: "square.and.arrow.down")
-                        .labelStyle(.titleOnly)
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .font(.headline)
-                        .foregroundStyle(.background)
-                }
-                .background(swan.text.isEmpty ? .secondary : .primary)
-                .clipShape(Capsule())
-                .disabled(swan.text.isEmpty)
-                .frame(maxWidth: 400, alignment: .center)
             }
             .padding()
             .navigationTitle("Edit Swan")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
                         dismiss()
                     } label: {
-                        Label("Close", systemImage: "xmark.circle.fill")
+                        if #available(iOS 26, *) {
+                            Label("Close", systemImage: "xmark")
+                        } else {
+                            Label("Close", systemImage: "xmark.circle.fill")
+                        }
                     }
-                    .tint(.primary)
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        saveChanges()
+                    } label: {
+                        Label("Save", systemImage: "checkmark")
+                    }
+                    .disabled(swan.text.isEmpty)
                 }
             }
         }

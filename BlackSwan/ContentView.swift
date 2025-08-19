@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject var themeManager: ThemeManager
-    
     @State var store = Store()
     @State var currentIndex: Int = 0
 
@@ -22,7 +20,6 @@ struct ContentView: View {
             }
         } else {
             OnboardingView()
-                .environmentObject(themeManager)
         }
     }
 }
@@ -30,6 +27,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .modelContainer(for: Swan.self, inMemory: true)
-        .environmentObject(ThemeManager())
 }
-

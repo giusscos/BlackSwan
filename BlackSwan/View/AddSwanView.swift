@@ -21,9 +21,8 @@ struct AddSwanView: View {
         NavigationStack {
             VStack(alignment: .leading) {
                 TextEditor(text: $text)
-                    .font(.title3)
-                    .fontWeight(.medium)
                     .textEditorStyle(.plain)
+                    .font(.headline)
                     .overlay (alignment: .topLeading) {
                         if text.isEmpty {
                             Text("Description")
@@ -31,35 +30,33 @@ struct AddSwanView: View {
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.tertiary)
                                 .textEditorStyle(.plain)
-                                .offset(x: 4, y: 8)
+                                .offset(x: 5, y: 8)
                         }
                     }
-                    .padding(.vertical)
-                
-                Button {
-                    addSwan(text: text)
-                } label: {
-                    Label("Save", systemImage: "square.and.arrow.up")
-                        .labelStyle(.titleOnly)
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .font(.headline)
-                        .foregroundStyle(.background)
-                }
-                .background(text.isEmpty ? .secondary : .primary)
-                .clipShape(Capsule())
-                .disabled(text.isEmpty)
-                .frame(maxWidth: 400, alignment: .center)
             }
-            .padding()
+            .navigationTitle("Create Event")
+            .padding(8)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(role: .destructive) {
                         dismiss()
                     } label: {
-                        Label("Close", systemImage: "xmark.circle.fill")
+                        if #available(iOS 26, *) {
+                            Label("Close", systemImage: "xmark")
+                        } else {
+                            Label("Close", systemImage: "xmark.circle.fill")
+                        }
                     }
-                    .tint(.primary)
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        addSwan(text: text)
+                    } label: {
+                        Label("Save", systemImage: "checkmark")
+                    }
+                    .tint(.blue)
+                    .disabled(text.isEmpty)
                 }
             }
         }
@@ -68,7 +65,7 @@ struct AddSwanView: View {
     func addSwan(text: String) {
         if text.isEmpty { return }
                 
-        let newSwan = Swan(text: text, timestamp: Date())
+        let newSwan = Swan(text: text)
         
         let result = calculateProbability(text)
         

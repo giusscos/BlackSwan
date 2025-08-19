@@ -9,8 +9,6 @@ import SwiftUI
 import StoreKit
 
 struct OnboardingView: View {
-    @EnvironmentObject var themeManager: ThemeManager
-    
     @State private var currentPage = 0
     
     private let pages = [
@@ -64,9 +62,7 @@ struct OnboardingPage: Identifiable {
 
 struct OnboardingPageView: View {
     let page: OnboardingPage
-    
-    @EnvironmentObject var themeManager: ThemeManager
-    
+        
     var body: some View {
         VStack(spacing: 24) {
             if page.systemImage == "AppIcon" {
@@ -78,7 +74,6 @@ struct OnboardingPageView: View {
             } else {
                 Image(systemName: page.systemImage)
                     .font(.largeTitle)
-                    .foregroundStyle(themeManager.gradient())
             }
             
             Text(page.title)
@@ -98,5 +93,4 @@ struct OnboardingPageView: View {
 
 #Preview {
     OnboardingView()
-        .environmentObject(ThemeManager())
-} 
+}

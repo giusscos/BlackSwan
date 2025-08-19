@@ -5,13 +5,12 @@
 //  Created by Giuseppe Cosenza on 11/04/25.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct SwanDetailsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var themeManager: ThemeManager
     
     var swan: Swan
     
@@ -23,59 +22,45 @@ struct SwanDetailsView: View {
     
     var body: some View {
         VStack (alignment: .leading) {
-            HStack {
-                Button(role: .destructive) {
-                    modelContext.delete(swan)
-                    dismiss()
-                } label: {
-                    Label("Delete", systemImage: "trash")
-                        .labelStyle(.titleOnly)
-                }
-                .padding(.vertical, 8)
-                .padding(.horizontal)
-                .fontWeight(.semibold)
-                .background(.red)
-                .foregroundStyle(.white)
-                .clipShape(Capsule())
-                
-                Button("Edit") {
-                    showingEditSheet = true
-                }
-                .padding(.vertical, 8)
-                .padding(.horizontal)
-                .fontWeight(.semibold)
-                .background(.ultraThinMaterial)
-                .foregroundStyle(.primary)
-                .clipShape(Capsule())
-                .frame(maxWidth: .infinity, alignment: .trailing)
-            }
-            .padding(.vertical)
-            
-            Text(swan.timestamp, format: Date.FormatStyle(date: .abbreviated, time: .shortened))
+            Text(swan.timestamp, format: .dateTime.day().month(.abbreviated).year(.twoDigits).hour().minute())
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
             
-            Text(swan.classification.displayString)
-                .font(.largeTitle)
-                .fontWeight(.bold)
-            
             Text(swan.text)
                 .font(.headline)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .navigationBarBackButtonHidden()
-        .foregroundStyle(.white)
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(themeManager.gradient(for: swan))
+        .padding(8)
+        .navigationTitle(swan.classification.displayString)
         .fullScreenCover(isPresented: $showingEditSheet) {
             EditSwanView(swan: swan)
         }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingEditSheet = true
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                }
+            }
+            
+            ToolbarItem(placement: .bottomBar) {
+                Button(role: .destructive) {
+                    deleteEvent()
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+        }
+    }
+    
+    private func deleteEvent() {
+        modelContext.delete(swan)
+        
+        dismiss()
     }
 }
 
 #Preview {
     SwanDetailsView(swan: Swan(text: "Lorem ipsum"))
-        .environmentObject(ThemeManager())
 }
