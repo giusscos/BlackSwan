@@ -28,55 +28,81 @@
       "productID" : "com.giusscos.appAccess",
       "referenceName" : "App access",
       "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "7.99",
+      "familyShareable" : false,
+      "internalID" : "07330C36",
+      "localizations" : [
+        {
+          "description" : "Lifetime access",
+          "displayName" : "BlackSwan Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.giusscos.blackSwanLifetime",
+      "referenceName" : "BlackSwan lifetime",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : false,
+      "internalID" : "41EB97E5",
+      "localizations" : [
+        {
+          "description" : "Family Lifetime access",
+          "displayName" : "BlackSwan Family Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.giusscos.blackSwanFamilyLifetime",
+      "referenceName" : "BlackSwan Family Lifetime",
+      "type" : "NonConsumable"
     }
   ],
   "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
     "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "USA",
     "_storeKitErrors" : [
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Load Products"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Purchase"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Verification"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "App Store Sync"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Subscription Status"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "App Transaction"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Manage Subscriptions Sheet"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Refund Request Sheet"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Offer Code Redeem Sheet"
       }

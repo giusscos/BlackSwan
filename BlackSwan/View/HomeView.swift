@@ -123,12 +123,6 @@ struct HomeView: View {
                     } label: {
                         Text("Manage subscription")
                     }
-                    
-                    Divider()
-                    
-                    Link("Terms of Service", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
-                    
-                    Link("Privacy Policy", destination: URL(string: "https://giusscos.it/privacy")!)
                 } label: {
                     if #available(iOS 26, *) {
                         Label("Menu", systemImage: "ellipsis")
@@ -139,7 +133,7 @@ struct HomeView: View {
             }
         }
         .fullScreenCover(isPresented: $displayAddSwanSheet) {
-            AddSwanView()
+            EditSwanView()
         }
         .manageSubscriptionsSheet(isPresented: $manageSubscription, subscriptionGroupID: Store().groupId)
     }

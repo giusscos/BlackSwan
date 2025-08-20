@@ -30,6 +30,7 @@ struct SwanDetailsView: View {
             Text(swan.text)
                 .font(.headline)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(8)
         .navigationTitle(swan.classification.displayString)
         .fullScreenCover(isPresented: $showingEditSheet) {
@@ -44,7 +45,7 @@ struct SwanDetailsView: View {
                 }
             }
             
-            ToolbarItem(placement: .bottomBar) {
+            ToolbarItem(placement: .destructiveAction) {
                 Button(role: .destructive) {
                     deleteEvent()
                 } label: {

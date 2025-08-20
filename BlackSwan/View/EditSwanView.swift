@@ -16,20 +16,24 @@ struct EditSwanView: View {
     enum Field: Hashable {
         case text
     }
+    
+    @FocusState var focusedField: Field?
 
-    @Bindable var swan: Swan
+    var swan: Swan?
+    
+    @State private var text: String = ""
+    
     @State var probability: Int = 50
     @State var classificationResult: String = ""
     
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading) {
-                TextEditor(text: $swan.text)
-                    .font(.title3)
-                    .fontWeight(.medium)
+                TextEditor(text: $text)
                     .textEditorStyle(.plain)
+                    .font(.headline)
                     .overlay (alignment: .topLeading) {
-                        if swan.text.isEmpty {
+                        if text.isEmpty {
                             Text("Description")
                                 .font(.title3)
                                 .fontWeight(.semibold)
@@ -38,11 +42,9 @@ struct EditSwanView: View {
                                 .offset(x: 4, y: 8)
                         }
                     }
-                    .padding(.vertical)
             }
             .padding()
-            .navigationTitle("Edit Swan")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(swan != nil ? "Edit event" : "Create event")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -58,22 +60,54 @@ struct EditSwanView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        saveChanges()
+                        save()
                     } label: {
                         Label("Save", systemImage: "checkmark")
                     }
-                    .disabled(swan.text.isEmpty)
+                    .disabled(text.isEmpty)
+                }
+                
+                ToolbarItem(placement: .keyboard) {
+                    Button {
+                        focusedField = .none
+                    } label: {
+                        Label("Hide keyboard", systemImage: "keyboard.chevron.compact.down")
+                    }
+                    .disabled(text.isEmpty)
+                }
+            }
+            .onAppear() {
+                focusedField = .text
+                
+                if let swan = swan {
+                    text = swan.text
                 }
             }
         }
     }
 
-    func saveChanges() {
-        if swan.text.isEmpty { return }
+    func save() {
+        if text.isEmpty { return }
+            
+        if let event = swan {
+            event.text = text
+            
+            if let result = calculateProbability(text) {
+                event.classification = SwanClassification(rawValue: result) ?? .deliberate
+            }
+            
+            dismiss()
+            
+            return
+        }
         
-        let result = calculateProbability(swan.text)
+        let newEvent = Swan(text: text)
         
-        swan.classification = SwanClassification(rawValue: result ?? "") ?? .deliberate
+        if let result = calculateProbability(text) {
+            newEvent.classification = SwanClassification(rawValue: result) ?? .deliberate
+        }
+        
+        modelContext.insert(newEvent)
         
         dismiss()
     }
