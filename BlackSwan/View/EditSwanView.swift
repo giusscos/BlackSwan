@@ -32,14 +32,13 @@ struct EditSwanView: View {
                 TextEditor(text: $text)
                     .textEditorStyle(.plain)
                     .font(.headline)
+                    .focused($focusedField, equals: .text)
                     .overlay (alignment: .topLeading) {
                         if text.isEmpty {
                             Text("Description")
-                                .font(.title3)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.tertiary)
-                                .textEditorStyle(.plain)
-                                .offset(x: 4, y: 8)
+                                .font(.headline)
+                                .foregroundStyle(.secondary.opacity(0.5))
+                                .offset(x: 5, y: 8)
                         }
                     }
             }
