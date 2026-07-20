@@ -9,16 +9,18 @@ import SwiftData
 import SwiftUI
 
 struct HomeView: View {
-    @Namespace var namespace
+    @Environment(Store.self) private var store
+    @Environment(\.modelContext) private var modelContext
+    @Namespace private var namespace
     
     @State private var selectedClassification: SwanClassification? = nil
     @State private var sortOrder: SortOrder = .reverse
-    
-    @State private var manageSubscription: Bool = false
+    @State private var manageSubscription = false
+    @State private var displayAddSwanSheet = false
     
     @Query(sort: \Swan.timestamp, order: .reverse) private var allSwans: [Swan]
     
-    var swans: [Swan] {
+    private var swans: [Swan] {
         var filtered = allSwans
         if let classification = selectedClassification {
             filtered = filtered.filter { $0.classification == classification }
@@ -29,14 +31,22 @@ struct HomeView: View {
         return filtered
     }
     
-    @State private var displayAddSwanSheet: Bool = false
+    private var snapshot: FragilitySnapshot {
+        FragilityAnalytics.snapshot(from: allSwans)
+    }
     
     var body: some View {
-        VStack {
-            Text("This app can make mistake")
+        VStack(spacing: 0) {
+            if !allSwans.isEmpty {
+                fragilityBanner
+            }
+            
+            Text("On-device AI can make mistakes — check confidence and override when needed.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .padding(8)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
             
             if !swans.isEmpty {
                 ScrollView(.horizontal) {
@@ -49,9 +59,7 @@ struct HomeView: View {
                                 CardView(swan: item)
                                     .frame(maxHeight: .infinity, alignment: .center)
                                     .matchedTransitionSource(id: item.id, in: namespace)
-                                    .scrollTransition(
-                                        axis: .horizontal
-                                    ) { content, phase in
+                                    .scrollTransition(axis: .horizontal) { content, phase in
                                         content
                                             .rotationEffect(.degrees(phase.value * 8))
                                             .scaleEffect(phase.isIdentity ? 1 : 0.9)
@@ -72,19 +80,29 @@ struct HomeView: View {
                     .foregroundStyle(.regularMaterial)
                     .frame(maxHeight: 500)
                     .overlay {
-                        VStack {
-                            Text("No contents yet")
+                        VStack(spacing: 12) {
+                            Text("No events yet")
                                 .font(.headline)
                             
-                            Text("Click the add button to add your first content!")
+                            Text("Log a shock or a chosen risk. We’ll classify it, suggest protections, and track your fragility over time.")
                                 .font(.subheadline)
+                                .foregroundStyle(.secondary)
                                 .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                            
+                            NavigationLink {
+                                PreMortemView()
+                            } label: {
+                                Label("Or run a pre-mortem", systemImage: "shield.lefthalf.filled")
+                            }
+                            .buttonStyle(.bordered)
                         }
                     }
                     .padding()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .navigationTitle("Black Swan")
         .toolbar {
             ToolbarItem(placement: .bottomBar) {
                 Button {
@@ -94,9 +112,37 @@ struct HomeView: View {
                 }
             }
             
+            ToolbarItemGroup(placement: .topBarLeading) {
+                NavigationLink {
+                    InsightsView()
+                } label: {
+                    Label("Fragility", systemImage: "chart.line.uptrend.xyaxis")
+                }
+                
+                NavigationLink {
+                    WeeklyReviewView()
+                } label: {
+                    Label("Review", systemImage: "calendar")
+                }
+            }
+            
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
+                    NavigationLink {
+                        PreMortemView()
+                    } label: {
+                        Label("Pre-mortem", systemImage: "shield.lefthalf.filled")
+                    }
+                    
+                    Button {
+                        MockData.insertSampleContent(into: modelContext)
+                    } label: {
+                        Label("Add mock data", systemImage: "wand.and.stars")
+                    }
+                    
                     if !allSwans.isEmpty {
+                        Divider()
+                        
                         Picker("Filter by Type", selection: $selectedClassification) {
                             Text("All")
                                 .tag(Optional<SwanClassification>.none)
@@ -135,10 +181,39 @@ struct HomeView: View {
         .fullScreenCover(isPresented: $displayAddSwanSheet) {
             EditSwanView()
         }
-        .manageSubscriptionsSheet(isPresented: $manageSubscription, subscriptionGroupID: Store().groupId)
+        .manageSubscriptionsSheet(isPresented: $manageSubscription, subscriptionGroupID: store.groupId)
+    }
+    
+    private var fragilityBanner: some View {
+        NavigationLink {
+            InsightsView()
+        } label: {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Fragility \(snapshot.score)")
+                        .font(.subheadline.weight(.semibold))
+                    Text(snapshot.summaryLine)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(12)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .padding(.horizontal)
+            .padding(.top, 8)
+        }
+        .buttonStyle(.plain)
     }
 }
 
 #Preview {
-    HomeView()
+    NavigationStack {
+        HomeView()
+            .environment(Store())
+    }
 }

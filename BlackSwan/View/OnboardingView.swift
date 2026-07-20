@@ -8,40 +8,31 @@
 import SwiftUI
 import StoreKit
 
+/// Subscription paywall shown after concept onboarding when the user has no entitlement.
 struct OnboardingView: View {
-    @State private var currentPage = 0
-    
-    private let pages = [
-        OnboardingPage(
-            title: "Add Your Events",
-            description: "Tap the + button to add new events. Each event will be automatically analyzed.",
-            systemImage: "plus.circle.fill"
-        ),
-        OnboardingPage(
-            title: "Smart Classification",
-            description: "Events are automatically classified as Black Swan or Deliberate using on-device machine learning.",
-            systemImage: "brain.head.profile"
-        ),
-        OnboardingPage(
-            title: "Customize Your Experience",
-            description: "Personalize the app's appearance with different themes and colors.",
-            systemImage: "paintpalette.fill"
-        )
-    ]
+    @Environment(Store.self) private var store
     
     var body: some View {
-        SubscriptionStoreView(groupID: Store().groupId) {
-            VStack {
-                TabView(selection: $currentPage) {
-                    ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
-                        OnboardingPageView(page: page)
-                            .padding()
-                            .tag(index)
-                    }
-                }
-                .tabViewStyle(.page)
-                .indexViewStyle(.page(backgroundDisplayMode: .always))
+        SubscriptionStoreView(groupID: Store.groupId) {
+            VStack(spacing: 20) {
+                Image("appIcon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 88, height: 88)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                
+                Text("Unlock Black Swan")
+                    .font(.title.bold())
+                    .multilineTextAlignment(.center)
+                
+                Text("Log events, get on-device classifications, and turn surprises into preparation — with a free trial.")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
             }
+            .frame(maxWidth: 400)
+            .padding()
         }
         .subscriptionStoreControlStyle(.compactPicker, placement: .automatic)
         .subscriptionStoreButtonLabel(.multiline)
@@ -50,47 +41,33 @@ struct OnboardingView: View {
         .subscriptionStorePolicyDestination(url: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!, for: .termsOfService)
         .tint(.primary)
         .interactiveDismissDisabled()
-    }
-}
-
-struct OnboardingPage: Identifiable {
-    let id = UUID()
-    let title: String
-    let description: String
-    let systemImage: String
-}
-
-struct OnboardingPageView: View {
-    let page: OnboardingPage
-        
-    var body: some View {
-        VStack(spacing: 24) {
-            if page.systemImage == "AppIcon" {
-                Image("appIcon")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 100, height: 100)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-            } else {
-                Image(systemName: page.systemImage)
-                    .font(.largeTitle)
+        .onInAppPurchaseCompletion { _, result in
+            // Nested Result: outer = StoreKit call, inner = PurchaseResult.
+            switch result {
+            case .success(.success(let verification)):
+                do {
+                    let transaction = try store.checkVerified(verification)
+                    await transaction.finish()
+                    store.markSubscribedFromPurchase()
+                    await store.refreshEntitlements()
+                } catch {
+                    print("Purchase verification failed: \(error)")
+                    await store.refreshEntitlements()
+                }
+            case .success(.pending):
+                break
+            case .success(.userCancelled):
+                break
+            case .success:
+                await store.refreshEntitlements()
+            case .failure(let error):
+                print("Purchase failed: \(error)")
             }
-            
-            Text(page.title)
-                .font(.title)
-                .fontWeight(.bold)
-                .multilineTextAlignment(.center)
-            
-            Text(page.description)
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal)
         }
-        .frame(maxWidth: 400, alignment: .center)
     }
 }
 
 #Preview {
     OnboardingView()
+        .environment(Store())
 }

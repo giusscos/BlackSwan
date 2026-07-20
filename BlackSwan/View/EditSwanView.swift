@@ -7,7 +7,6 @@
 
 import SwiftUI
 import SwiftData
-import CoreML
 
 struct EditSwanView: View {
     @Environment(\.dismiss) private var dismiss
@@ -17,14 +16,13 @@ struct EditSwanView: View {
         case text
     }
     
-    @FocusState var focusedField: Field?
+    @FocusState private var focusedField: Field?
 
     var swan: Swan?
     
     @State private var text: String = ""
-    
-    @State var probability: Int = 50
-    @State var classificationResult: String = ""
+    @State private var isSaving = false
+    @State private var saveError: String?
     
     var body: some View {
         NavigationStack {
@@ -33,14 +31,33 @@ struct EditSwanView: View {
                     .textEditorStyle(.plain)
                     .font(.headline)
                     .focused($focusedField, equals: .text)
-                    .overlay (alignment: .topLeading) {
+                    .overlay(alignment: .topLeading) {
                         if text.isEmpty {
-                            Text("Description")
+                            Text("Describe what happened…")
                                 .font(.headline)
                                 .foregroundStyle(.secondary.opacity(0.5))
                                 .offset(x: 5, y: 8)
+                                .allowsHitTesting(false)
                         }
                     }
+                
+                if isSaving {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text(InsightService.isAvailable
+                             ? "Classifying & generating insight…"
+                             : "Classifying…")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.bottom, 8)
+                }
+                
+                if let saveError {
+                    Text(saveError)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
             }
             .padding()
             .navigationTitle(swan != nil ? "Edit event" : "Create event")
@@ -55,82 +72,81 @@ struct EditSwanView: View {
                             Label("Close", systemImage: "xmark.circle.fill")
                         }
                     }
+                    .disabled(isSaving)
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        save()
+                        Task { await save() }
                     } label: {
                         Label("Save", systemImage: "checkmark")
                     }
-                    .disabled(text.isEmpty)
+                    .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving)
                 }
                 
                 ToolbarItem(placement: .keyboard) {
                     Button {
-                        focusedField = .none
+                        focusedField = nil
                     } label: {
                         Label("Hide keyboard", systemImage: "keyboard.chevron.compact.down")
                     }
-                    .disabled(text.isEmpty)
                 }
             }
-            .onAppear() {
+            .interactiveDismissDisabled(isSaving)
+            .onAppear {
                 focusedField = .text
-                
-                if let swan = swan {
+                if let swan {
                     text = swan.text
                 }
             }
         }
     }
 
-    func save() {
-        if text.isEmpty { return }
-            
-        if let event = swan {
-            event.text = text
-            
-            if let result = calculateProbability(text) {
-                event.classification = SwanClassification(rawValue: result) ?? .deliberate
-            }
-            
-            dismiss()
-            
+    @MainActor
+    private func save() async {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        
+        isSaving = true
+        saveError = nil
+        defer { isSaving = false }
+        
+        guard let result = ClassificationService.classify(trimmed) else {
+            saveError = "Could not classify this event. Try again."
             return
         }
         
-        let newEvent = Swan(text: text)
-        
-        if let result = calculateProbability(text) {
-            newEvent.classification = SwanClassification(rawValue: result) ?? .deliberate
+        let target: Swan
+        if let existing = swan {
+            existing.text = trimmed
+            existing.apply(classification: result)
+            existing.clearInsight()
+            existing.theme = RiskTheme.infer(from: trimmed)
+            target = existing
+        } else {
+            let created = Swan(text: trimmed)
+            created.apply(classification: result)
+            modelContext.insert(created)
+            target = created
         }
         
-        modelContext.insert(newEvent)
+        if let insight = await InsightService.generateInsight(
+            for: trimmed,
+            classification: result.classification,
+            probability: result.probability
+        ) {
+            target.apply(insight: insight)
+        }
         
         dismiss()
-    }
-    
-    func calculateProbability(_ inputText: String) -> String? {
-        do {
-            let config = MLModelConfiguration()
-            let model = try BlackSwanV250000Finance(configuration: config)
-            let result = try model.prediction(text: inputText)
-            
-            return result.label
-        } catch {
-            print("Error calculating probability: \(error)")
-            return nil
-        }
     }
 }
 
 #Preview {
-    // Create a dummy Swan in memory for the preview
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
     let container = try! ModelContainer(for: Swan.self, configurations: config)
     let sampleSwan = Swan(text: "Sample text details.")
 
     return EditSwanView(swan: sampleSwan)
         .modelContainer(container)
-} 
+}

@@ -1,6 +1,6 @@
 //
 //  Store.swift
-//  TomaTask
+//  BlackSwan
 //
 //  Created by Giuseppe Cosenza on 31/10/24.
 //
@@ -8,31 +8,30 @@
 import Foundation
 import StoreKit
 
-//alias
-typealias RenewalInfo = StoreKit.Product.SubscriptionInfo.RenewalInfo //The Product.SubscriptionInfo.RenewalInfo provides information about the next subscription renewal period.
-typealias RenewalState = StoreKit.Product.SubscriptionInfo.RenewalState // the renewal states of auto-renewable subscriptions.
+typealias RenewalInfo = StoreKit.Product.SubscriptionInfo.RenewalInfo
+typealias RenewalState = StoreKit.Product.SubscriptionInfo.RenewalState
 
 @Observable
+@MainActor
 class Store {
-    private var subscriptions: [Product] = []
-    var purchasedSubscriptions: [Product] = []
-    private var subscriptionGroupStatus: RenewalState?
+    private(set) var subscriptions: [Product] = []
+    /// Driven by `subscriptionStatusTask` / `refreshEntitlements`.
+    var isSubscribed: Bool = false
     var isLoading: Bool = true
     
-    private let productIds: [String] = ["bs_1999_1y_1w", "bs_199_1m_3d"]
-//    private let productIds: [String] = ["bs_199_1m_d", "bs_1999_1y_1w"] // test
-    let groupId: String = "21679517"
-//    let groupId: String = "9591B6AF" // test
+    private let productIds: Set<String> = ["bs_1999_1y_1w", "bs_199_1m_3d"]
+    static let groupId: String = "21679517"
     
-    var updateListenerTask : Task<Void, Error>? = nil
+    var groupId: String { Self.groupId }
+    
+    private nonisolated(unsafe) var updateListenerTask: Task<Void, Never>?
     
     init() {
-        //start a transaction listern as close to app launch as possible so you don't miss a transaction
         updateListenerTask = listenForTransactions()
         
         Task {
             await requestProducts()
-            await updateCustomerProductStatus()
+            await refreshEntitlements()
             isLoading = false
         }
     }
@@ -41,91 +40,94 @@ class Store {
         updateListenerTask?.cancel()
     }
     
-    func listenForTransactions() -> Task<Void, Error> {
-        return Task.detached {
-            //Iterate through any transactions that don't come from a direct call to `purchase()`.
+    private func listenForTransactions() -> Task<Void, Never> {
+        Task { [weak self] in
             for await result in Transaction.updates {
+                guard let self else { return }
                 do {
-                    let transaction = try self.checkVerified(result)
-                    // deliver products to the user
-                    await self.updateCustomerProductStatus()
-                    
+                    let transaction = try checkVerified(result)
+                    await refreshEntitlements()
                     await transaction.finish()
                 } catch {
-                    print("transaction failed verification")
+                    print("transaction failed verification: \(error)")
                 }
             }
         }
     }
     
-    // Request the products
-    @MainActor
     func requestProducts() async {
         do {
-            // request from the app store using the product ids (hardcoded)
-            subscriptions = try await Product.products(for: productIds)
+            subscriptions = try await Product.products(for: Array(productIds))
         } catch {
             print("Failed product request from app store server: \(error)")
         }
     }
     
-    // purchase the product
-    func purchase(_ product: Product) async throws -> Transaction? {
-        let result = try await product.purchase()
-        
-        switch result {
-        case .success(let verification):
-            //Check whether the transaction is verified. If it isn't,
-            //this function rethrows the verification error.
-            let transaction = try checkVerified(verification)
-            
-            //The transaction is verified. Deliver content to the user.
-            await updateCustomerProductStatus()
-            
-            //Always finish a transaction.
-            await transaction.finish()
-            
-            return transaction
-        case .userCancelled, .pending:
-            return nil
-        default:
-            return nil
-        }
-    }
-    
     func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
-        //Check whether the JWS passes StoreKit verification.
         switch result {
         case .unverified:
-            //StoreKit parses the JWS, but it fails verification.
             throw StoreError.failedVerification
         case .verified(let safe):
-            //The result is verified. Return the unwrapped value.
             return safe
         }
     }
     
-    @MainActor
-    func updateCustomerProductStatus() async {
-        for await result in Transaction.currentEntitlements {
-            do {
-                //Check whether the transaction is verified. If it isn't, catch `failedVerification` error.
-                let transaction = try checkVerified(result)
-                
-                switch transaction.productType {
-                case .autoRenewable:
-                    if let subscription = subscriptions.first(where: {$0.id == transaction.productID}) {
-                        purchasedSubscriptions.append(subscription)
-                    }
-                default:
-                    break
-                }
-                //Always finish a transaction.
-                await transaction.finish()
-            } catch {
-                print("failed updating products")
+    /// Prefer subscription-group status; fall back to current entitlements.
+    func refreshEntitlements() async {
+        if let subscribed = await subscriptionGroupIsActive() {
+            isSubscribed = subscribed
+            return
+        }
+        
+        isSubscribed = await hasEntitlementTransaction()
+    }
+    
+    func updateFromSubscriptionStatuses(_ statuses: [Product.SubscriptionInfo.Status]) {
+        isSubscribed = Self.hasActiveSubscription(in: statuses)
+        isLoading = false
+    }
+    
+    /// Call immediately after a verified purchase so UI can leave the paywall without waiting.
+    func markSubscribedFromPurchase() {
+        isSubscribed = true
+        isLoading = false
+    }
+    
+    private static func hasActiveSubscription(in statuses: [Product.SubscriptionInfo.Status]) -> Bool {
+        statuses.contains { status in
+            switch status.state {
+            case .subscribed, .inGracePeriod, .inBillingRetryPeriod:
+                return true
+            default:
+                return false
             }
         }
+    }
+    
+    private func subscriptionGroupIsActive() async -> Bool? {
+        do {
+            let statuses = try await Product.SubscriptionInfo.status(for: Self.groupId)
+            return Self.hasActiveSubscription(in: statuses)
+        } catch {
+            print("SubscriptionInfo.status failed: \(error)")
+            return nil
+        }
+    }
+    
+    private func hasEntitlementTransaction() async -> Bool {
+        for await result in Transaction.currentEntitlements {
+            do {
+                let transaction = try checkVerified(result)
+                guard transaction.productType == .autoRenewable else { continue }
+                guard productIds.contains(transaction.productID) else { continue }
+                if transaction.revocationDate != nil { continue }
+                if let expiration = transaction.expirationDate, expiration < Date() { continue }
+                return true
+            } catch {
+                continue
+            }
+        }
+        return false
     }
 }
 

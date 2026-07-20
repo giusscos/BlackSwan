@@ -13,6 +13,7 @@ struct BlackSwanApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Swan.self,
+            PreMortem.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         
@@ -26,7 +27,7 @@ struct BlackSwanApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .onAppear() {
+                .onAppear {
                     UITextField.appearance().clearButtonMode = .whileEditing
                 }
         }
