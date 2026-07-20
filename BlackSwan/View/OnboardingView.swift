@@ -12,6 +12,9 @@ import StoreKit
 struct OnboardingView: View {
     @Environment(Store.self) private var store
     
+    @State private var headerVisible = false
+    @State private var purchaseSuccessHaptic = false
+    
     var body: some View {
         SubscriptionStoreView(groupID: Store.groupId) {
             VStack(spacing: 20) {
@@ -20,19 +23,36 @@ struct OnboardingView: View {
                     .scaledToFit()
                     .frame(width: 88, height: 88)
                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .shadow(color: .black.opacity(0.12), radius: 16, y: 8)
+                    .scaleEffect(headerVisible ? 1 : 0.86)
+                    .opacity(headerVisible ? 1 : 0)
                 
-                Text("Unlock Black Swan")
-                    .font(.title.bold())
-                    .multilineTextAlignment(.center)
+                VStack(spacing: 10) {
+                    Text("Unlock Black Swan")
+                        .font(.title.bold())
+                        .multilineTextAlignment(.center)
+                    
+                    Text("Fragility insights, weekly reviews, pre-mortems, and on-device plans — start with a free trial.")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                .opacity(headerVisible ? 1 : 0)
+                .offset(y: headerVisible ? 0 : 14)
                 
-                Text("Log events, get on-device classifications, and turn surprises into preparation — with a free trial.")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+                VStack(alignment: .leading, spacing: 10) {
+                    PaywallPerk(icon: "chart.line.uptrend.xyaxis", text: "Track your fragility over time")
+                    PaywallPerk(icon: "checklist", text: "Turn shocks into done mitigations")
+                    PaywallPerk(icon: "shield.lefthalf.filled", text: "Run pre-mortems before surprises")
+                }
+                .padding(.top, 4)
+                .opacity(headerVisible ? 1 : 0)
+                .offset(y: headerVisible ? 0 : 18)
             }
             .frame(maxWidth: 400)
             .padding()
+            .animation(.spring(response: 0.55, dampingFraction: 0.82), value: headerVisible)
         }
         .subscriptionStoreControlStyle(.compactPicker, placement: .automatic)
         .subscriptionStoreButtonLabel(.multiline)
@@ -41,6 +61,12 @@ struct OnboardingView: View {
         .subscriptionStorePolicyDestination(url: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!, for: .termsOfService)
         .tint(.primary)
         .interactiveDismissDisabled()
+        .sensoryFeedback(.success, trigger: purchaseSuccessHaptic)
+        .onAppear {
+            withAnimation(.spring(response: 0.55, dampingFraction: 0.82).delay(0.05)) {
+                headerVisible = true
+            }
+        }
         .onInAppPurchaseCompletion { _, result in
             // Nested Result: outer = StoreKit call, inner = PurchaseResult.
             switch result {
@@ -48,6 +74,7 @@ struct OnboardingView: View {
                 do {
                     let transaction = try store.checkVerified(verification)
                     await transaction.finish()
+                    purchaseSuccessHaptic.toggle()
                     store.markSubscribedFromPurchase()
                     await store.refreshEntitlements()
                 } catch {
@@ -64,6 +91,29 @@ struct OnboardingView: View {
                 print("Purchase failed: \(error)")
             }
         }
+    }
+}
+
+private struct PaywallPerk: View {
+    let icon: String
+    let text: String
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.primary)
+                .frame(width: 24)
+            
+            Text(text)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 

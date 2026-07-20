@@ -18,64 +18,65 @@
   ],
   "settings" : {
     "_applicationInternalID" : "6745398469",
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
     "_developerTeamID" : "MA7MBQ947C",
+    "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 767897154.02962804,
+    "_lastSynchronizedDate" : 806261289.93635297,
     "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "USA",
     "_storeKitErrors" : [
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Load Products"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Purchase"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Verification"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "App Store Sync"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Subscription Status"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "App Transaction"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Manage Subscriptions Sheet"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Refund Request Sheet"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Offer Code Redeem Sheet"
       }
-    ]
+    ],
+    "_timeRate" : 0
   },
   "subscriptionGroups" : [
     {
       "id" : "21679517",
       "localizations" : [
-
+        {
+          "description" : "",
+          "displayName" : "Unlock Black Swan Full Access",
+          "locale" : "en_US"
+        }
       ],
       "name" : "Unlock Full Access",
       "subscriptions" : [
@@ -83,38 +84,14 @@
           "adHocOffers" : [
 
           ],
-          "codeOffers" : [
-
-          ],
-          "displayPrice" : "1.99",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "6745408015",
-          "introductoryOffer" : {
-            "internalID" : "BD60B121",
-            "numberOfPeriods" : 1,
-            "paymentMode" : "free",
-            "subscriptionPeriod" : "P3D"
-          },
-          "localizations" : [
+          "billingPlans" : [
             {
-              "description" : "Full Access to the app",
-              "displayName" : "1 Month Full Access",
-              "locale" : "en_US"
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "19.99",
+              "displayPrice" : "19.99",
+              "internalID" : "6745407966_BILLED_UPFRONT",
+              "isEnabled" : true
             }
-          ],
-          "productID" : "bs_199_1m_3d",
-          "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "BlackSwan Monthly $1.99, 3 Days free",
-          "subscriptionGroupID" : "21679517",
-          "type" : "RecurringSubscription",
-          "winbackOffers" : [
-
-          ]
-        },
-        {
-          "adHocOffers" : [
-
           ],
           "codeOffers" : [
 
@@ -123,13 +100,15 @@
           "familyShareable" : false,
           "groupNumber" : 2,
           "internalID" : "6745407966",
-          "introductoryOffer" : {
-            "internalID" : "3CF04AA4",
-            "numberOfPeriods" : 1,
-            "paymentMode" : "free",
-            "subscriptionPeriod" : "P1W"
-          },
+          "introductoryOffers" : [
+
+          ],
           "localizations" : [
+            {
+              "description" : "Full Access to the app for a year",
+              "displayName" : "Yearly Access",
+              "locale" : "en_US"
+            },
             {
               "description" : "Full Access to the app",
               "displayName" : "1 Year Full Access",
@@ -144,12 +123,51 @@
           "winbackOffers" : [
 
           ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "4.99",
+              "displayPrice" : "4.99",
+              "internalID" : "6792829625_BILLED_UPFRONT",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "6792829625",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+            {
+              "description" : "Full Access to the app for one week",
+              "displayName" : "Weekly Access",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.giusscos.blackswan.weekly",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "Weekly",
+          "subscriptionGroupID" : "21679517",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
         }
       ]
     }
   ],
   "version" : {
-    "major" : 4,
+    "major" : 5,
     "minor" : 0
   }
 }

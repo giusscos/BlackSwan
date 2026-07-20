@@ -7,16 +7,27 @@
 
 import SwiftData
 import SwiftUI
+import TipKit
 
 struct HomeView: View {
     @Environment(Store.self) private var store
     @Environment(\.modelContext) private var modelContext
     @Namespace private var namespace
     
+    @AppStorage("lastSeenWhatsNewVersion") private var lastSeenWhatsNewVersion = ""
+    
     @State private var selectedClassification: SwanClassification? = nil
     @State private var sortOrder: SortOrder = .reverse
     @State private var manageSubscription = false
     @State private var displayAddSwanSheet = false
+    @State private var showWhatsNew = false
+    @State private var tipsEnabled = false
+    @State private var homeTips = TipGroup(.ordered) {
+        AddEventTip()
+        FragilityTip()
+        WeeklyReviewTip()
+        PreMortemTip()
+    }
     
     @Query(sort: \Swan.timestamp, order: .reverse) private var allSwans: [Swan]
     
@@ -96,6 +107,10 @@ struct HomeView: View {
                                 Label("Or run a pre-mortem", systemImage: "shield.lefthalf.filled")
                             }
                             .buttonStyle(.bordered)
+                            .simultaneousGesture(TapGesture().onEnded {
+                                PreMortemTip().invalidate(reason: .actionPerformed)
+                            })
+                            .popoverTip(tipsEnabled ? homeTips.currentTip as? PreMortemTip : nil)
                         }
                     }
                     .padding()
@@ -106,10 +121,12 @@ struct HomeView: View {
         .toolbar {
             ToolbarItem(placement: .bottomBar) {
                 Button {
+                    AddEventTip().invalidate(reason: .actionPerformed)
                     displayAddSwanSheet = true
                 } label: {
                     Label("Add", systemImage: "plus")
                 }
+                .popoverTip(tipsEnabled ? homeTips.currentTip as? AddEventTip : nil)
             }
             
             ToolbarItemGroup(placement: .topBarLeading) {
@@ -118,12 +135,20 @@ struct HomeView: View {
                 } label: {
                     Label("Fragility", systemImage: "chart.line.uptrend.xyaxis")
                 }
+                .simultaneousGesture(TapGesture().onEnded {
+                    FragilityTip().invalidate(reason: .actionPerformed)
+                })
+                .popoverTip(tipsEnabled ? homeTips.currentTip as? FragilityTip : nil)
                 
                 NavigationLink {
                     WeeklyReviewView()
                 } label: {
                     Label("Review", systemImage: "calendar")
                 }
+                .simultaneousGesture(TapGesture().onEnded {
+                    WeeklyReviewTip().invalidate(reason: .actionPerformed)
+                })
+                .popoverTip(tipsEnabled ? homeTips.currentTip as? WeeklyReviewTip : nil)
             }
             
             ToolbarItem(placement: .topBarTrailing) {
@@ -132,6 +157,12 @@ struct HomeView: View {
                         PreMortemView()
                     } label: {
                         Label("Pre-mortem", systemImage: "shield.lefthalf.filled")
+                    }
+                    
+                    Button {
+                        showWhatsNew = true
+                    } label: {
+                        Label("What’s New", systemImage: "sparkles")
                     }
                     
                     Button {
@@ -176,12 +207,26 @@ struct HomeView: View {
                         Label("Menu", systemImage: "ellipsis.circle")
                     }
                 }
+                .simultaneousGesture(TapGesture().onEnded {
+                    if homeTips.currentTip is PreMortemTip {
+                        PreMortemTip().invalidate(reason: .actionPerformed)
+                    }
+                })
+                .popoverTip(tipsEnabled && !allSwans.isEmpty ? homeTips.currentTip as? PreMortemTip : nil)
             }
         }
         .fullScreenCover(isPresented: $displayAddSwanSheet) {
             EditSwanView()
         }
+        .sheet(isPresented: $showWhatsNew, onDismiss: didDismissWhatsNew) {
+            WhatsNewView()
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
         .manageSubscriptionsSheet(isPresented: $manageSubscription, subscriptionGroupID: store.groupId)
+        .task {
+            presentWhatsNewIfNeeded()
+        }
     }
     
     private var fragilityBanner: some View {
@@ -208,6 +253,22 @@ struct HomeView: View {
             .padding(.top, 8)
         }
         .buttonStyle(.plain)
+        .simultaneousGesture(TapGesture().onEnded {
+            FragilityTip().invalidate(reason: .actionPerformed)
+        })
+    }
+    
+    private func presentWhatsNewIfNeeded() {
+        if lastSeenWhatsNewVersion != AppVersion.marketing {
+            showWhatsNew = true
+        } else {
+            tipsEnabled = true
+        }
+    }
+    
+    private func didDismissWhatsNew() {
+        lastSeenWhatsNewVersion = AppVersion.marketing
+        tipsEnabled = true
     }
 }
 

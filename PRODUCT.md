@@ -122,6 +122,16 @@ Fallbacks exist so the app remains useful without Apple Intelligence.
 
 ## Change log
 
+### 2026-07-20 — What’s New + TipKit guided steps
+
+**Product**
+- What’s New sheet on Home after version updates (also via Menu → What’s New)
+- TipKit ordered tips: Add event → Fragility → Weekly review → Pre-mortem
+
+**Technical**
+- `WhatsNewView` + `AppVersion`; `@AppStorage("lastSeenWhatsNewVersion")`
+- `AppTips` TipKit tips; `Tips.configure` in `BlackSwanApp`; `TipGroup(.ordered)` on Home
+
 ### 2026-07-20 — Value loop + paywall unlock + docs
 
 **Product**

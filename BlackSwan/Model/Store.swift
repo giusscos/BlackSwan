@@ -19,7 +19,7 @@ class Store {
     var isSubscribed: Bool = false
     var isLoading: Bool = true
     
-    private let productIds: Set<String> = ["bs_1999_1y_1w", "bs_199_1m_3d"]
+    private let productIds: Set<String> = ["bs_1999_1y_1w", "com.giusscos.blackswan.weekly"]
     static let groupId: String = "21679517"
     
     var groupId: String { Self.groupId }
