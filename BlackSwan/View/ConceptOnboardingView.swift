@@ -224,45 +224,31 @@ private struct ConceptPageView: View {
     let isActive: Bool
     let contentVisible: Bool
     let iconBounce: Int
-    
+
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     var body: some View {
+        if verticalSizeClass == .compact {
+            landscapeBody
+        } else {
+            portraitBody
+        }
+    }
+
+    @ViewBuilder
+    private var portraitBody: some View {
         VStack(spacing: 24) {
             Spacer(minLength: 12)
-            
-            ZStack {
-                Circle()
-                    .fill(.ultraThinMaterial)
-                    .frame(width: 148, height: 148)
-                    .overlay {
-                        Circle()
-                            .strokeBorder(page.accent.opacity(0.2), lineWidth: 1)
-                    }
-                    .shadow(color: page.accent.opacity(0.18), radius: 24, y: 10)
-                    .scaleEffect(contentVisible ? 1 : 0.82)
-                    .opacity(contentVisible ? 1 : 0)
-                
-                Circle()
-                    .fill(page.accent.opacity(0.14))
-                    .frame(width: 112, height: 112)
-                    .scaleEffect(contentVisible ? 1 : 0.7)
-                
-                Image(systemName: page.systemImage)
-                    .font(.system(size: 48, weight: .semibold))
-                    .foregroundStyle(page.accent)
-                    .symbolRenderingMode(.hierarchical)
-                    .symbolEffect(.bounce, value: iconBounce)
-                    .scaleEffect(contentVisible ? 1 : 0.6)
-                    .opacity(contentVisible ? 1 : 0)
-            }
-            .animation(.spring(response: 0.55, dampingFraction: 0.75), value: contentVisible)
-            
+
+            iconCircle(size: 148, iconSize: 48)
+
             VStack(spacing: 12) {
                 Text(page.title)
                     .font(.title.bold())
                     .multilineTextAlignment(.center)
                     .opacity(contentVisible ? 1 : 0)
                     .offset(y: contentVisible ? 0 : 14)
-                
+
                 Text(page.description)
                     .font(.body)
                     .foregroundStyle(.secondary)
@@ -272,7 +258,7 @@ private struct ConceptPageView: View {
                     .offset(y: contentVisible ? 0 : 18)
             }
             .animation(.spring(response: 0.5, dampingFraction: 0.84).delay(0.06), value: contentVisible)
-            
+
             if !page.highlights.isEmpty {
                 VStack(spacing: 10) {
                     ForEach(Array(page.highlights.enumerated()), id: \.element.id) { index, highlight in
@@ -288,10 +274,81 @@ private struct ConceptPageView: View {
                 }
                 .padding(.top, 4)
             }
-            
+
             Spacer(minLength: 24)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private var landscapeBody: some View {
+        HStack(alignment: .center, spacing: 24) {
+            iconCircle(size: 80, iconSize: 28)
+                .frame(width: 80)
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text(page.title)
+                    .font(.title2.bold())
+                    .opacity(contentVisible ? 1 : 0)
+                    .offset(y: contentVisible ? 0 : 8)
+
+                Text(page.description)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .opacity(contentVisible ? 1 : 0)
+                    .offset(y: contentVisible ? 0 : 10)
+
+                if !page.highlights.isEmpty {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                        ForEach(Array(page.highlights.enumerated()), id: \.element.id) { index, highlight in
+                            HighlightChip(highlight: highlight, accent: page.accent)
+                                .opacity(contentVisible ? 1 : 0)
+                                .offset(y: contentVisible ? 0 : 8)
+                                .animation(
+                                    .spring(response: 0.48, dampingFraction: 0.82)
+                                        .delay(0.10 + Double(index) * 0.05),
+                                    value: contentVisible
+                                )
+                        }
+                    }
+                    .padding(.top, 4)
+                }
+            }
+            .animation(.spring(response: 0.5, dampingFraction: 0.84).delay(0.06), value: contentVisible)
+        }
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private func iconCircle(size: CGFloat, iconSize: CGFloat) -> some View {
+        ZStack {
+            Circle()
+                .fill(.ultraThinMaterial)
+                .frame(width: size, height: size)
+                .overlay {
+                    Circle()
+                        .strokeBorder(page.accent.opacity(0.2), lineWidth: 1)
+                }
+                .shadow(color: page.accent.opacity(0.18), radius: 24, y: 10)
+                .scaleEffect(contentVisible ? 1 : 0.82)
+                .opacity(contentVisible ? 1 : 0)
+
+            Circle()
+                .fill(page.accent.opacity(0.14))
+                .frame(width: size * 0.76, height: size * 0.76)
+                .scaleEffect(contentVisible ? 1 : 0.7)
+
+            Image(systemName: page.systemImage)
+                .font(.system(size: iconSize, weight: .semibold))
+                .foregroundStyle(page.accent)
+                .symbolRenderingMode(.hierarchical)
+                .symbolEffect(.bounce, value: iconBounce)
+                .scaleEffect(contentVisible ? 1 : 0.6)
+                .opacity(contentVisible ? 1 : 0)
+        }
+        .animation(.spring(response: 0.55, dampingFraction: 0.75), value: contentVisible)
     }
 }
 

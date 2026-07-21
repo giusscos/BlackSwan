@@ -83,7 +83,6 @@ struct SwanDetailsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .navigationTitle(swan.classification.displayString)
-        .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(isPresented: $showingEditSheet) {
             EditSwanView(swan: swan)
         }

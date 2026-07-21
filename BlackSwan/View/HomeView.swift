@@ -12,6 +12,8 @@ import TipKit
 struct HomeView: View {
     @Environment(Store.self) private var store
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Namespace private var namespace
     
     @AppStorage("lastSeenWhatsNewVersion") private var lastSeenWhatsNewVersion = ""
@@ -48,48 +50,69 @@ struct HomeView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            if !allSwans.isEmpty {
+            if !allSwans.isEmpty && verticalSizeClass != .compact {
                 fragilityBanner
             }
-            
-            Text("On-device AI can make mistakes — check confidence and override when needed.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-                .padding(.vertical, 8)
+
+            if verticalSizeClass != .compact {
+                Text("On-device AI can make mistakes — check confidence and override when needed.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+            }
             
             if !swans.isEmpty {
-                ScrollView(.horizontal) {
-                    LazyHStack {
-                        ForEach(swans) { item in
-                            NavigationLink {
-                                SwanDetailsView(swan: item)
-                                    .navigationTransition(.zoom(sourceID: item.id, in: namespace))
-                            } label: {
-                                CardView(swan: item)
-                                    .frame(maxHeight: .infinity, alignment: .center)
-                                    .matchedTransitionSource(id: item.id, in: namespace)
-                                    .scrollTransition(axis: .horizontal) { content, phase in
-                                        content
-                                            .rotationEffect(.degrees(phase.value * 8))
-                                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                                            .offset(y: phase.isIdentity ? 0 : 40)
-                                            .blur(radius: phase.isIdentity ? 0 : 3)
-                                    }
-                                    .containerRelativeFrame(.horizontal)
+                if horizontalSizeClass == .regular {
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 280))], spacing: 16) {
+                            ForEach(swans) { item in
+                                NavigationLink {
+                                    SwanDetailsView(swan: item)
+                                        .navigationTransition(.zoom(sourceID: item.id, in: namespace))
+                                } label: {
+                                    CardView(swan: item)
+                                        .frame(minHeight: 270)
+                                        .matchedTransitionSource(id: item.id, in: namespace)
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
+                        .padding()
                     }
-                    .scrollTargetLayout()
+                } else {
+                    ScrollView(.horizontal) {
+                        LazyHStack {
+                            ForEach(swans) { item in
+                                NavigationLink {
+                                    SwanDetailsView(swan: item)
+                                        .navigationTransition(.zoom(sourceID: item.id, in: namespace))
+                                } label: {
+                                    CardView(swan: item)
+                                        .frame(maxHeight: .infinity, alignment: .center)
+                                        .matchedTransitionSource(id: item.id, in: namespace)
+                                        .scrollTransition(axis: .horizontal) { content, phase in
+                                            content
+                                                .rotationEffect(.degrees(phase.value * 8))
+                                                .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                                                .offset(y: phase.isIdentity ? 0 : 40)
+                                                .blur(radius: phase.isIdentity ? 0 : 3)
+                                        }
+                                        .containerRelativeFrame(.horizontal)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .scrollTargetLayout()
+                    }
+                    .scrollIndicators(.hidden)
+                    .scrollTargetBehavior(.viewAligned)
                 }
-                .scrollIndicators(.hidden)
-                .scrollTargetBehavior(.viewAligned)
             } else {
                 RoundedRectangle(cornerRadius: 32)
                     .foregroundStyle(.regularMaterial)
-                    .frame(maxHeight: 500)
+                    .frame(maxHeight: verticalSizeClass == .compact ? 200 : 500)
                     .overlay {
                         VStack(spacing: 12) {
                             Text("No events yet")
@@ -118,6 +141,7 @@ struct HomeView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationTitle("Black Swan")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .bottomBar) {
                 Button {
