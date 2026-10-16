@@ -49,7 +49,7 @@ BLACK SWAN ABO
 Für den vollen Zugriff ist ein Abo nötig, wöchentlich oder jährlich abgerechnet. Neue Abonnenten des Jahresabos können einen kostenlosen Probezeitraum erhalten. Die Zahlung wird über deinen Apple Account abgerechnet. Abos verlängern sich automatisch, wenn sie nicht mindestens 24 Stunden vor Ende des aktuellen Zeitraums gekündigt werden. Verwalten oder kündigen jederzeit in den Einstellungen deines Apple Accounts.
 
 Nutzungsbedingungen: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Datenschutzerklärung: https://giusscos.it/privacy
+Datenschutzerklärung: https://giusscos.com/work/black-swan/privacy/
 ```
 
 ## What's New *(4000)*

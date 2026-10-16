@@ -49,7 +49,7 @@ ABONNEMENT BLACK SWAN
 L’accès complet nécessite un abonnement, facturé chaque semaine ou chaque année. Les nouveaux abonnés au forfait annuel peuvent bénéficier d’un essai gratuit. Le paiement est débité de ton compte Apple. L’abonnement se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la période en cours. Gère ou résilie à tout moment dans les réglages de ton compte Apple.
 
 Conditions d’utilisation : https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Politique de confidentialité : https://giusscos.it/privacy
+Politique de confidentialité : https://giusscos.com/work/black-swan/privacy/
 ```
 
 ## What's New *(4000)*

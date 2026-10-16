@@ -49,7 +49,7 @@ ABBONAMENTO BLACK SWAN
 L'accesso completo richiede un abbonamento, con addebito settimanale o annuale. I nuovi abbonati al piano annuale possono avere una prova gratuita. Il pagamento viene addebitato sul tuo account Apple. Gli abbonamenti si rinnovano automaticamente se non vengono disdetti almeno 24 ore prima della fine del periodo in corso. Gestisci o disdici quando vuoi nelle impostazioni del tuo account Apple.
 
 Termini d'uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Informativa sulla privacy: https://giusscos.it/privacy
+Informativa sulla privacy: https://giusscos.com/work/black-swan/privacy/
 ```
 
 ## What's New *(4000)*

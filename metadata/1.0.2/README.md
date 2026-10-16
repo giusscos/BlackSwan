@@ -91,7 +91,7 @@ BLACK SWAN SUBSCRIPTION
 Full access requires a subscription, billed weekly or yearly. New subscribers to the yearly plan may be eligible for a free trial. Payment is charged to your Apple Account. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in your Apple Account settings.
 
 Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Privacy Policy: https://giusscos.it/privacy
+Privacy Policy: https://giusscos.com/work/black-swan/privacy/
 ```
 
 > Fixes in the current live description: it says "weekly or yearly" in one place and "monthly or yearly" in another. Monthly is removed from sale, so the text now only says weekly or yearly.

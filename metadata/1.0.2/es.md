@@ -49,7 +49,7 @@ SUSCRIPCIÓN A BLACK SWAN
 El acceso completo requiere una suscripción, con cobro semanal o anual. Los nuevos suscriptores del plan anual pueden tener una prueba gratuita. El pago se carga a tu cuenta de Apple. Las suscripciones se renuevan automáticamente salvo que se cancelen al menos 24 horas antes del final del periodo actual. Gestiona o cancela cuando quieras en los ajustes de tu cuenta de Apple.
 
 Condiciones de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Política de privacidad: https://giusscos.it/privacy
+Política de privacidad: https://giusscos.com/work/black-swan/privacy/
 ```
 
 ## What's New *(4000)*
