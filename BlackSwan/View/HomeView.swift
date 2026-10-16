@@ -10,6 +10,9 @@ import SwiftUI
 import TipKit
 
 struct HomeView: View {
+    /// Set by the paywall's welcome screen so a new subscriber lands straight in "add event".
+    static let openAddEventKey = "openAddEventOnHome"
+    
     @Environment(Store.self) private var store
     @Environment(\.modelContext) private var modelContext
     @Environment(\.verticalSizeClass) private var verticalSizeClass
@@ -140,7 +143,7 @@ struct HomeView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationTitle("Black Swan")
+        .navigationTitle(Text(verbatim: "Black Swan"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .bottomBar) {
@@ -189,11 +192,13 @@ struct HomeView: View {
                         Label("What’s New", systemImage: "sparkles")
                     }
                     
+                    #if DEBUG
                     Button {
                         MockData.insertSampleContent(into: modelContext)
                     } label: {
                         Label("Add mock data", systemImage: "wand.and.stars")
                     }
+                    #endif
                     
                     if !allSwans.isEmpty {
                         Divider()
@@ -249,6 +254,22 @@ struct HomeView: View {
         }
         .manageSubscriptionsSheet(isPresented: $manageSubscription, subscriptionGroupID: store.groupId)
         .task {
+            #if DEBUG
+            if UserDefaults.standard.bool(forKey: "SeedScreenshotData"), allSwans.isEmpty {
+                MockData.insertSampleContent(into: modelContext)
+                lastSeenWhatsNewVersion = WhatsNewView.contentVersion
+            }
+            #endif
+            if UserDefaults.standard.bool(forKey: Self.openAddEventKey) {
+                UserDefaults.standard.set(false, forKey: Self.openAddEventKey)
+                // A brand-new subscriber has nothing to catch up on in What's New.
+                lastSeenWhatsNewVersion = WhatsNewView.contentVersion
+                if allSwans.isEmpty {
+                    tipsEnabled = true
+                    displayAddSwanSheet = true
+                    return
+                }
+            }
             presentWhatsNewIfNeeded()
         }
     }
@@ -283,7 +304,7 @@ struct HomeView: View {
     }
     
     private func presentWhatsNewIfNeeded() {
-        if lastSeenWhatsNewVersion != AppVersion.marketing {
+        if lastSeenWhatsNewVersion != WhatsNewView.contentVersion {
             showWhatsNew = true
         } else {
             tipsEnabled = true
@@ -291,7 +312,7 @@ struct HomeView: View {
     }
     
     private func didDismissWhatsNew() {
-        lastSeenWhatsNewVersion = AppVersion.marketing
+        lastSeenWhatsNewVersion = WhatsNewView.contentVersion
         tipsEnabled = true
     }
 }

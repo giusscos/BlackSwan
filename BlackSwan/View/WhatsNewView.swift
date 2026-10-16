@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct WhatsNewView: View {
+    /// The release these features shipped in. Bump it only when the list below changes,
+    /// so an update without user-facing news doesn't show the sheet again.
+    static let contentVersion = "1.0.1"
+    
     @Environment(\.dismiss) private var dismiss
     
     @State private var contentVisible = false
@@ -188,10 +192,10 @@ struct WhatsNewView: View {
 }
 
 private struct WhatsNewFeature: Identifiable {
-    var id: String { title }
+    var id: String { icon }
     let icon: String
-    let title: String
-    let detail: String
+    let title: LocalizedStringKey
+    let detail: LocalizedStringKey
 }
 
 enum AppVersion {

@@ -16,6 +16,8 @@ struct PreMortemView: View {
     @State private var isGenerating = false
     @State private var errorMessage: String?
     @State private var selected: PreMortem?
+    /// Opens on the most recent saved plan (used for App Store screenshots).
+    var showsLatest = false
     
     var body: some View {
         ScrollView {
@@ -93,6 +95,11 @@ struct PreMortemView: View {
             .padding(16)
         }
         .navigationTitle("Pre-mortem")
+        .onAppear {
+            if showsLatest, selected == nil {
+                selected = saved.first
+            }
+        }
     }
     
     @ViewBuilder

@@ -122,6 +122,30 @@ Fallbacks exist so the app remains useful without Apple Intelligence.
 
 ## Change log
 
+### 2026-10-16 — Onboarding, paywall and listing for 1.0.2
+
+**Why:** App Analytics showed 975 impressions, 41 page views and 4 downloads in 90 days, and no paid conversions ever. The paywall promised a free trial that isn't configured in App Store Connect.
+
+**Product**
+- Onboarding rewritten in pola's style: hook → "what feels fragile?" (money / work / health / relationships) → live demo of a shock turning into a plan → fragility score falling → paywall
+- Custom paywall replaces `SubscriptionStoreView`: headline personalized to the chosen theme, plans pinned with the CTA, "Save 92%" and per-week price, charge disclosure under the button, trial timeline and trial-ending reminder only when the intro offer is really redeemable
+- After purchase: "You're all set" screen → straight into logging the first event (skips What's New)
+- "Add mock data" is Debug-only
+
+**Technical**
+- `Store`: `purchase`, `restorePurchases`, `trialEligibleIDs`, price helpers on `Product`; Debug flags `SimulatorSubscribed` / `SeedScreenshotData` for screenshots
+- `FocusThemes` (`@AppStorage("focusThemes")`), `TrialReminder` (local notification 2 days before the trial ends)
+- `WhatsNewView.contentVersion` so the sheet only re-shows when its content changes
+- Listing, metadata and screenshots in `metadata/1.0.2/`
+
+**Localization (same release)**
+- App in German, Spanish, French and Italian: `Localizable.xcstrings` (266 strings), filled by `metadata/localization/apply_translations.py` from `translations.py`
+- Model strings (labels, themes, fallback insights, summaries, sample data) use `String(localized:)`; plural hacks rewritten as "Label: count"
+- Foundation Models are told to answer in the device language; theme keys stay English
+- Theme inference keywords cover all five languages. The Core ML classifier is still English-trained, so non-English events may classify less reliably
+- App Store: localized name, subtitle, description, keywords, promo text and What's New for de, es-ES, fr-FR, it
+- `ScreenshotHarness` (Debug only, `-ScreenshotScreen <name>`) + `metadata/1.0.2/capture.sh` + `make_byjo.py` produce ByJo-style slides for iPhone and iPad in every language
+
 ### 2026-07-20 — What’s New + TipKit guided steps
 
 **Product**

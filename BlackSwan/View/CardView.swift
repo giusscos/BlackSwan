@@ -65,8 +65,8 @@ struct ConfidenceBadge: View {
     var isOverride: Bool = false
     
     private var label: String {
-        if isOverride { return "Manual" }
-        if probability < 55 { return "Uncertain · \(probability)%" }
+        if isOverride { return String(localized: "Manual") }
+        if probability < 55 { return String(localized: "Uncertain · \(probability)%") }
         return "\(probability)%"
     }
     

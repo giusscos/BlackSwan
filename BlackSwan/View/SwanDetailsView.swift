@@ -68,7 +68,7 @@ struct SwanDetailsView: View {
                         Task { await refreshInsight() }
                     } label: {
                         Label(
-                            isRefreshingInsight ? "Generating…" : "Generate insight & plan",
+                            isRefreshingInsight ? LocalizedStringKey("Generating…") : LocalizedStringKey("Generate insight & plan"),
                             systemImage: "sparkles"
                         )
                     }

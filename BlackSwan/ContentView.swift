@@ -11,8 +11,22 @@ import SwiftUI
 struct ContentView: View {
     @State private var store = Store()
     @AppStorage("hasCompletedConceptOnboarding") private var hasCompletedConceptOnboarding = false
+    @State private var isHoldingPaywall = false
 
     var body: some View {
+        #if DEBUG
+        if let screen = ScreenshotHarness.requestedScreen {
+            ScreenshotHarness(screen: screen)
+                .environment(store)
+        } else {
+            appBody
+        }
+        #else
+        appBody
+        #endif
+    }
+    
+    private var appBody: some View {
         Group {
             if !hasCompletedConceptOnboarding {
                 ConceptOnboardingView(hasCompletedOnboarding: $hasCompletedConceptOnboarding)
@@ -23,7 +37,7 @@ struct ContentView: View {
             } else if store.isLoading {
                 ProgressView()
                     .transition(.opacity)
-            } else if store.isSubscribed {
+            } else if store.isSubscribed && !isHoldingPaywall {
                 NavigationStack {
                     HomeView()
                 }
@@ -32,7 +46,7 @@ struct ContentView: View {
                     removal: .opacity
                 ))
             } else {
-                OnboardingView()
+                PaywallView(isHoldingPaywall: $isHoldingPaywall)
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing).combined(with: .opacity),
                         removal: .opacity
@@ -41,6 +55,7 @@ struct ContentView: View {
         }
         .animation(.snappy(duration: 0.4), value: hasCompletedConceptOnboarding)
         .animation(.snappy(duration: 0.4), value: store.isSubscribed)
+        .animation(.snappy(duration: 0.4), value: isHoldingPaywall)
         .animation(.easeInOut(duration: 0.25), value: store.isLoading)
         .environment(store)
         .subscriptionStatusTask(for: Store.groupId) { taskState in

@@ -7,165 +7,136 @@
 
 import SwiftUI
 
+/// Four short screens before the paywall: the hook, what the person worries about,
+/// the product working on their own kind of shock, then the outcome.
 struct ConceptOnboardingView: View {
     @Binding var hasCompletedOnboarding: Bool
-    
-    @State private var currentPage = 0
-    @State private var contentVisible = false
-    @State private var iconBounce = 0
-    @State private var continuePulse = false
-    @State private var pageHaptic = 0
+
+    @AppStorage(FocusThemes.storageKey) private var focusThemesRaw = ""
+
+    @State private var currentPage: Int
+    @State private var selectedThemes: Set<RiskTheme> = []
     @State private var continueHaptic = false
     @State private var completeHaptic = false
+
+    private let pageCount = 4
     
-    private let pages: [ConceptPage] = [
-        ConceptPage(
-            title: "What is a Black Swan?",
-            description: "A rare, high-impact event that seems obvious only after it happens. You cannot predict the exact shock — but you can prepare for surprise.",
-            systemImage: "bird.fill",
-            accent: .primary,
-            highlights: []
-        ),
-        ConceptPage(
-            title: "Black Swan vs Deliberate",
-            description: "Deliberate risks are choices you can see coming. Black Swans are outliers: unexpected, severe, and hard to price in advance.",
-            systemImage: "arrow.left.arrow.right",
-            accent: .orange,
-            highlights: [
-                ConceptHighlight(icon: "exclamationmark.triangle.fill", label: "Black Swan", detail: "Unexpected shock"),
-                ConceptHighlight(icon: "hand.raised.fill", label: "Deliberate", detail: "Known trade-off")
-            ]
-        ),
-        ConceptPage(
-            title: "Limit the damage",
-            description: "Build buffers, diversify exposure, and keep optionality. Journaling shocks helps you spot fragile spots before the next surprise.",
-            systemImage: "shield.lefthalf.filled",
-            accent: .green,
-            highlights: [
-                ConceptHighlight(icon: "checkmark.shield.fill", label: "Buffers", detail: "Absorb the hit"),
-                ConceptHighlight(icon: "arrow.triangle.branch", label: "Optionality", detail: "Keep exits open")
-            ]
-        ),
-        ConceptPage(
-            title: "How Black Swan helps",
-            description: "Log shocks, track mitigations, run pre-mortems, and watch your fragility fall — privately on your device.",
-            systemImage: "sparkles",
-            accent: .blue,
-            highlights: [
-                ConceptHighlight(icon: "chart.line.uptrend.xyaxis", label: "Fragility score", detail: "See weak spots"),
-                ConceptHighlight(icon: "calendar.badge.clock", label: "Weekly review", detail: "Build the ritual"),
-                ConceptHighlight(icon: "shield.lefthalf.filled", label: "Pre-mortems", detail: "Plan before impact"),
-                ConceptHighlight(icon: "checklist", label: "Mitigations", detail: "Mark protections done")
-            ]
-        )
-    ]
-    
-    private var isLastPage: Bool {
-        currentPage == pages.count - 1
+    init(hasCompletedOnboarding: Binding<Bool>, initialPage: Int = 0) {
+        _hasCompletedOnboarding = hasCompletedOnboarding
+        _currentPage = State(initialValue: initialPage)
     }
-    
+
+    private var isLastPage: Bool {
+        currentPage == pageCount - 1
+    }
+
+    private var accent: Color {
+        switch currentPage {
+        case 1: .orange
+        case 2: .red
+        case 3: .green
+        default: .primary
+        }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            progressDots
+            topBar
                 .padding(.top, 12)
-                .padding(.bottom, 8)
-            
+                .padding(.horizontal, 24)
+
             TabView(selection: $currentPage) {
-                ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
-                    ConceptPageView(
-                        page: page,
-                        isActive: currentPage == index,
-                        contentVisible: contentVisible && currentPage == index,
-                        iconBounce: iconBounce
-                    )
-                    .padding(.horizontal, 24)
-                    .tag(index)
-                }
+                OnboardingPage { HookPage(isActive: currentPage == 0) }
+                    .tag(0)
+                OnboardingPage { ThemePickerPage(selection: $selectedThemes) }
+                    .tag(1)
+                OnboardingPage { DemoPage(event: FocusThemes.demoEvent(for: focusThemesRaw), isActive: currentPage == 2) }
+                    .tag(2)
+                OnboardingPage { OutcomePage(isActive: currentPage == 3) }
+                    .tag(3)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .animation(.snappy(duration: 0.35), value: currentPage)
-            
-            VStack(spacing: 12) {
-                Button {
-                    advance()
-                } label: {
-                    Text(isLastPage ? "Get started" : "Continue")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .scaleEffect(continuePulse ? 1.02 : 1)
-                }
-                .buttonStyle(.borderedProminent)
-                .sensoryFeedback(.impact(flexibility: .solid, intensity: 0.7), trigger: continueHaptic)
-                .sensoryFeedback(.success, trigger: completeHaptic)
-                
-            if !isLastPage {
-                Button("Skip") {
-                    complete()
-                }
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .sensoryFeedback(.selection, trigger: completeHaptic)
-            } else {
-                Color.clear.frame(height: 20)
+
+            Button {
+                advance()
+            } label: {
+                Text(buttonTitle)
+                    .font(.headline)
+                    .foregroundStyle(Color(.systemBackground))
+                    .frame(maxWidth: 432)
+                    .frame(height: 56)
+                    .background(Color(.label), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .contentTransition(.opacity)
             }
-            }
+            .buttonStyle(.plain)
             .padding(.horizontal, 24)
-            .padding(.bottom, 28)
-            .opacity(contentVisible ? 1 : 0)
-            .offset(y: contentVisible ? 0 : 16)
+            .padding(.top, 8)
+            .padding(.bottom, 20)
+            .sensoryFeedback(.impact(flexibility: .solid, intensity: 0.7), trigger: continueHaptic)
+            .sensoryFeedback(.success, trigger: completeHaptic)
         }
         .background {
             ZStack {
-                LinearGradient(
-                    colors: [
-                        Color(.systemBackground),
-                        pages[currentPage].accent.opacity(0.08),
-                        Color(.secondarySystemBackground).opacity(0.7)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                
+                Color(.systemBackground)
                 Circle()
-                    .fill(pages[currentPage].accent.opacity(0.12))
-                    .frame(width: 280, height: 280)
+                    .fill(accent.opacity(0.12))
+                    .frame(width: 320, height: 320)
+                    .blur(radius: 70)
+                    .offset(x: 100, y: -220)
+                Circle()
+                    .fill(accent.opacity(0.08))
+                    .frame(width: 240, height: 240)
                     .blur(radius: 60)
-                    .offset(x: 90, y: -180)
-                    .animation(.easeInOut(duration: 0.55), value: currentPage)
-                
-                Circle()
-                    .fill(pages[currentPage].accent.opacity(0.08))
-                    .frame(width: 220, height: 220)
-                    .blur(radius: 50)
-                    .offset(x: -110, y: 260)
-                    .animation(.easeInOut(duration: 0.55), value: currentPage)
+                    .offset(x: -120, y: 280)
             }
+            .animation(.easeInOut(duration: 0.55), value: currentPage)
             .ignoresSafeArea()
         }
-        .sensoryFeedback(.selection, trigger: pageHaptic)
+        .sensoryFeedback(.selection, trigger: currentPage)
+        .onChange(of: selectedThemes) { _, newValue in
+            focusThemesRaw = FocusThemes.encode(newValue)
+        }
         .onAppear {
-            animatePageEntry()
-        }
-        .onChange(of: currentPage) { _, _ in
-            pageHaptic += 1
-            animatePageEntry()
+            selectedThemes = Set(FocusThemes.decode(focusThemesRaw))
         }
     }
-    
-    private var progressDots: some View {
-        HStack(spacing: 8) {
-            ForEach(0..<pages.count, id: \.self) { index in
-                Capsule()
-                    .fill(index == currentPage ? pages[currentPage].accent : Color.secondary.opacity(0.25))
-                    .frame(width: index == currentPage ? 28 : 8, height: 8)
-                    .animation(.spring(response: 0.4, dampingFraction: 0.7), value: currentPage)
+
+    private var buttonTitle: LocalizedStringKey {
+        switch currentPage {
+        case 0: "Get started"
+        case 1: selectedThemes.isEmpty ? LocalizedStringKey("Skip for now") : LocalizedStringKey("Continue")
+        case 2: "Show me the result"
+        default: "Continue"
+        }
+    }
+
+    private var topBar: some View {
+        HStack {
+            HStack(spacing: 6) {
+                ForEach(0..<pageCount, id: \.self) { index in
+                    Capsule()
+                        .fill(index <= currentPage ? Color.primary : Color.secondary.opacity(0.25))
+                        .frame(width: index == currentPage ? 24 : 8, height: 6)
+                }
             }
+            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: currentPage)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Page \(currentPage + 1) of \(pageCount)")
+
+            Spacer()
+
+            Button("Skip") {
+                complete()
+            }
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .opacity(isLastPage ? 0 : 1)
+            .disabled(isLastPage)
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Page \(currentPage + 1) of \(pages.count)")
+        .frame(height: 32)
     }
-    
+
     private func advance() {
         if isLastPage {
             complete()
@@ -174,213 +145,340 @@ struct ConceptOnboardingView: View {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
                 currentPage += 1
             }
-            pulseContinue()
         }
     }
-    
+
     private func complete() {
         completeHaptic.toggle()
         withAnimation(.easeInOut(duration: 0.25)) {
             hasCompletedOnboarding = true
         }
     }
-    
-    private func animatePageEntry() {
-        contentVisible = false
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.82).delay(0.05)) {
-            contentVisible = true
+}
+
+/// Centers a page vertically and scrolls on short screens (landscape, small iPhones).
+private struct OnboardingPage<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        GeometryReader { proxy in
+            ScrollView {
+                content
+                    .frame(maxWidth: 480)
+                    .padding(.horizontal, 24)
+                    .frame(maxWidth: .infinity, minHeight: proxy.size.height)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            .scrollIndicators(.hidden)
         }
-        iconBounce += 1
-        pulseContinue()
     }
-    
-    private func pulseContinue() {
-        withAnimation(.easeInOut(duration: 0.9).repeatCount(1, autoreverses: true)) {
-            continuePulse = true
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) {
-            continuePulse = false
+}
+
+private struct PageTitle: View {
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Text(title)
+                .font(.largeTitle.bold())
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(subtitle)
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
 
-private struct ConceptPage {
-    let title: String
-    let description: String
-    let systemImage: String
-    let accent: Color
-    let highlights: [ConceptHighlight]
-}
+// MARK: - 1. Hook
 
-private struct ConceptHighlight: Identifiable {
-    var id: String { label }
-    let icon: String
-    let label: String
-    let detail: String
-}
-
-private struct ConceptPageView: View {
-    let page: ConceptPage
+private struct HookPage: View {
     let isActive: Bool
-    let contentVisible: Bool
-    let iconBounce: Int
 
-    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @State private var appeared = false
+
+    private let shocks: [(icon: String, text: LocalizedStringKey, angle: Double, x: CGFloat)] = [
+        ("briefcase.fill", "Biggest client cancelled", -4, -12),
+        ("cross.case.fill", "Surprise $2,400 hospital bill", 3, 10),
+        ("chart.line.downtrend.xyaxis", "Market dropped 18% overnight", -2, -6)
+    ]
 
     var body: some View {
-        if verticalSizeClass == .compact {
-            landscapeBody
-        } else {
-            portraitBody
-        }
-    }
-
-    @ViewBuilder
-    private var portraitBody: some View {
-        VStack(spacing: 24) {
-            Spacer(minLength: 12)
-
-            iconCircle(size: 148, iconSize: 48)
-
+        VStack(spacing: 36) {
             VStack(spacing: 12) {
-                Text(page.title)
-                    .font(.title.bold())
-                    .multilineTextAlignment(.center)
-                    .opacity(contentVisible ? 1 : 0)
-                    .offset(y: contentVisible ? 0 : 14)
-
-                Text(page.description)
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: 360)
-                    .opacity(contentVisible ? 1 : 0)
-                    .offset(y: contentVisible ? 0 : 18)
-            }
-            .animation(.spring(response: 0.5, dampingFraction: 0.84).delay(0.06), value: contentVisible)
-
-            if !page.highlights.isEmpty {
-                VStack(spacing: 10) {
-                    ForEach(Array(page.highlights.enumerated()), id: \.element.id) { index, highlight in
-                        HighlightChip(highlight: highlight, accent: page.accent)
-                            .opacity(contentVisible ? 1 : 0)
-                            .offset(y: contentVisible ? 0 : 12)
-                            .animation(
-                                .spring(response: 0.48, dampingFraction: 0.82)
-                                    .delay(0.12 + Double(index) * 0.06),
-                                value: contentVisible
-                            )
+                ForEach(Array(shocks.enumerated()), id: \.offset) { index, shock in
+                    HStack(spacing: 10) {
+                        Image(systemName: shock.icon)
+                            .foregroundStyle(.red)
+                        Text(shock.text)
+                            .font(.subheadline.weight(.semibold))
+                        Text("Black Swan")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(Color(.systemBackground))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color(.label), in: Capsule())
                     }
-                }
-                .padding(.top, 4)
-            }
-
-            Spacer(minLength: 24)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    @ViewBuilder
-    private var landscapeBody: some View {
-        HStack(alignment: .center, spacing: 24) {
-            iconCircle(size: 80, iconSize: 28)
-                .frame(width: 80)
-
-            VStack(alignment: .leading, spacing: 10) {
-                Text(page.title)
-                    .font(.title2.bold())
-                    .opacity(contentVisible ? 1 : 0)
-                    .offset(y: contentVisible ? 0 : 8)
-
-                Text(page.description)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .opacity(contentVisible ? 1 : 0)
-                    .offset(y: contentVisible ? 0 : 10)
-
-                if !page.highlights.isEmpty {
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                        ForEach(Array(page.highlights.enumerated()), id: \.element.id) { index, highlight in
-                            HighlightChip(highlight: highlight, accent: page.accent)
-                                .opacity(contentVisible ? 1 : 0)
-                                .offset(y: contentVisible ? 0 : 8)
-                                .animation(
-                                    .spring(response: 0.48, dampingFraction: 0.82)
-                                        .delay(0.10 + Double(index) * 0.05),
-                                    value: contentVisible
-                                )
-                        }
-                    }
-                    .padding(.top, 4)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .shadow(color: .black.opacity(0.08), radius: 12, y: 6)
+                    .rotationEffect(.degrees(shock.angle))
+                    .offset(x: shock.x)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 24)
+                    .animation(.spring(response: 0.6, dampingFraction: 0.75).delay(0.1 + Double(index) * 0.12), value: appeared)
                 }
             }
-            .animation(.spring(response: 0.5, dampingFraction: 0.84).delay(0.06), value: contentVisible)
+
+            PageTitle(
+                title: "Life doesn't send a warning",
+                subtitle: "You can't predict the next shock. You can be ready for it. Black Swan helps you spot where you're fragile and protect yourself before it hits."
+            )
         }
-        .padding(.vertical, 8)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    @ViewBuilder
-    private func iconCircle(size: CGFloat, iconSize: CGFloat) -> some View {
-        ZStack {
-            Circle()
-                .fill(.ultraThinMaterial)
-                .frame(width: size, height: size)
-                .overlay {
-                    Circle()
-                        .strokeBorder(page.accent.opacity(0.2), lineWidth: 1)
-                }
-                .shadow(color: page.accent.opacity(0.18), radius: 24, y: 10)
-                .scaleEffect(contentVisible ? 1 : 0.82)
-                .opacity(contentVisible ? 1 : 0)
-
-            Circle()
-                .fill(page.accent.opacity(0.14))
-                .frame(width: size * 0.76, height: size * 0.76)
-                .scaleEffect(contentVisible ? 1 : 0.7)
-
-            Image(systemName: page.systemImage)
-                .font(.system(size: iconSize, weight: .semibold))
-                .foregroundStyle(page.accent)
-                .symbolRenderingMode(.hierarchical)
-                .symbolEffect(.bounce, value: iconBounce)
-                .scaleEffect(contentVisible ? 1 : 0.6)
-                .opacity(contentVisible ? 1 : 0)
-        }
-        .animation(.spring(response: 0.55, dampingFraction: 0.75), value: contentVisible)
+        .onAppear { appeared = isActive }
+        .onChange(of: isActive) { _, active in if active { appeared = true } }
     }
 }
 
-private struct HighlightChip: View {
-    let highlight: ConceptHighlight
-    let accent: Color
-    
+// MARK: - 2. Personalize
+
+private struct ThemePickerPage: View {
+    @Binding var selection: Set<RiskTheme>
+
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: highlight.icon)
-                .font(.body.weight(.semibold))
-                .foregroundStyle(accent)
-                .frame(width: 28)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(highlight.label)
-                    .font(.subheadline.weight(.semibold))
-                
-                Text(highlight.detail)
-                    .font(.caption)
+        VStack(spacing: 28) {
+            PageTitle(
+                title: "What feels fragile right now?",
+                subtitle: "Pick everything that applies. We'll focus your plan there."
+            )
+
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                ForEach(FocusThemes.choices) { theme in
+                    let isSelected = selection.contains(theme)
+                    Button {
+                        if isSelected {
+                            selection.remove(theme)
+                        } else {
+                            selection.insert(theme)
+                        }
+                    } label: {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Image(systemName: theme.systemImage)
+                                    .font(.title2)
+                                    .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
+                                Spacer()
+                                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(isSelected ? Color(.systemBackground) : .secondary)
+                                    .contentTransition(.symbolEffect(.replace))
+                            }
+                            Text(theme.displayString)
+                                .font(.headline)
+                                .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
+                            Text(themeDetail(theme))
+                                .font(.caption)
+                                .foregroundStyle(isSelected ? Color(.systemBackground).opacity(0.75) : .secondary)
+                                .lineLimit(2, reservesSpace: true)
+                                .multilineTextAlignment(.leading)
+                        }
+                        .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            isSelected ? AnyShapeStyle(Color(.label)) : AnyShapeStyle(.regularMaterial),
+                            in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .sensoryFeedback(.selection, trigger: isSelected)
+                    .animation(.snappy(duration: 0.2), value: isSelected)
+                }
+            }
+        }
+    }
+
+    private func themeDetail(_ theme: RiskTheme) -> LocalizedStringKey {
+        switch theme {
+        case .money: "Savings, debt, investments"
+        case .work: "Income, clients, your job"
+        case .health: "Injuries, bills, burnout"
+        case .relationships: "Family, partner, home"
+        case .other: ""
+        }
+    }
+}
+
+// MARK: - 3. Demo
+
+private struct DemoPage: View {
+    let event: DemoEvent
+    let isActive: Bool
+
+    @State private var step = 0
+
+    var body: some View {
+        VStack(spacing: 28) {
+            PageTitle(
+                title: "Turn a shock into a plan",
+                subtitle: "Write what happened. Black Swan classifies it on your device and suggests how to protect yourself next time."
+            )
+
+            VStack(alignment: .leading, spacing: 14) {
+                Text(event.text)
+                    .font(.body.weight(.medium))
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if step >= 1 {
+                    HStack(spacing: 8) {
+                        Label("Black Swan", systemImage: "bird.fill")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Color(.systemBackground))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Color(.label), in: Capsule())
+                        Text("\(event.confidence)% confident")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
+                }
+
+                if step >= 2 {
+                    Divider()
+                    Text("Your protections")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+
+                    ForEach(Array(event.mitigations.enumerated()), id: \.offset) { index, item in
+                        HStack(spacing: 10) {
+                            Image(systemName: step >= 3 + index ? "checkmark.circle.fill" : "circle")
+                                .foregroundStyle(step >= 3 + index ? .green : .secondary)
+                                .contentTransition(.symbolEffect(.replace))
+                            Text(item)
+                                .font(.subheadline)
+                                .strikethrough(step >= 3 + index, color: .secondary)
+                                .foregroundStyle(step >= 3 + index ? .secondary : .primary)
+                        }
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .shadow(color: .black.opacity(0.08), radius: 20, y: 10)
+            .sensoryFeedback(.impact(weight: .light), trigger: step)
+
+            HStack(spacing: 16) {
+                legend(color: .primary, title: "Black Swan", detail: "Rare, severe, unexpected")
+                legend(color: .orange, title: "Deliberate", detail: "A risk you chose")
+            }
+        }
+        .task(id: isActive) {
+            guard isActive else { return }
+            step = 0
+            for next in 1...(2 + event.mitigations.count) {
+                try? await Task.sleep(for: .milliseconds(next == 1 ? 600 : 700))
+                guard !Task.isCancelled else { return }
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+                    step = next
+                }
+            }
+        }
+    }
+
+    private func legend(color: Color, title: LocalizedStringKey, detail: LocalizedStringKey) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Circle()
+                .fill(color)
+                .frame(width: 8, height: 8)
+                .padding(.top, 5)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                Text(detail)
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
             }
-            
-            Spacer(minLength: 0)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(accent.opacity(0.12), lineWidth: 1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+// MARK: - 4. Outcome
+
+private struct OutcomePage: View {
+    let isActive: Bool
+
+    @State private var score = 72
+    @State private var progress = 0.72
+
+    var body: some View {
+        VStack(spacing: 32) {
+            ZStack {
+                Circle()
+                    .stroke(Color.secondary.opacity(0.15), lineWidth: 16)
+                Circle()
+                    .trim(from: 0, to: progress)
+                    .stroke(scoreColor.gradient, style: StrokeStyle(lineWidth: 16, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                VStack(spacing: 2) {
+                    Text("\(score)")
+                        .font(.system(size: 56, weight: .bold, design: .rounded))
+                        .contentTransition(.numericText(value: Double(score)))
+                    Text("Fragility")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .frame(width: 190, height: 190)
+
+            PageTitle(
+                title: "Watch your fragility fall",
+                subtitle: "Every protection you finish lowers your score. A weekly review keeps the habit going."
+            )
+
+            VStack(alignment: .leading, spacing: 12) {
+                row(icon: "calendar", title: "Weekly review", detail: "Five minutes on wins, open actions and one focus")
+                row(icon: "shield.lefthalf.filled", title: "Pre-mortems", detail: "Imagine the worst case and build buffers early")
+                row(icon: "lock.fill", title: "Private by design", detail: "No account. Everything stays on your iPhone")
+            }
         }
+        .task(id: isActive) {
+            guard isActive else { return }
+            score = 72
+            progress = 0.72
+            try? await Task.sleep(for: .milliseconds(400))
+            withAnimation(.easeInOut(duration: 1.6)) {
+                score = 38
+                progress = 0.38
+            }
+        }
+    }
+
+    private var scoreColor: Color {
+        score > 55 ? .red : .green
+    }
+
+    private func row(icon: String, title: LocalizedStringKey, detail: LocalizedStringKey) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: icon)
+                .font(.body.weight(.semibold))
+                .frame(width: 36, height: 36)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                Text(detail)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

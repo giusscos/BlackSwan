@@ -16,9 +16,9 @@ enum SwanClassification: String, Codable, CaseIterable {
     var displayString: String {
         switch self {
         case .blackSwan:
-            return "Black Swan"
+            return String(localized: "Black Swan")
         case .deliberate:
-            return "Deliberate"
+            return String(localized: "Deliberate")
         }
     }
 }
@@ -34,11 +34,11 @@ enum RiskTheme: String, Codable, CaseIterable, Identifiable {
     
     var displayString: String {
         switch self {
-        case .money: return "Money"
-        case .work: return "Work"
-        case .health: return "Health"
-        case .relationships: return "Relationships"
-        case .other: return "Other"
+        case .money: return String(localized: "Money")
+        case .work: return String(localized: "Work")
+        case .health: return String(localized: "Health")
+        case .relationships: return String(localized: "Relationships")
+        case .other: return String(localized: "Other")
         }
     }
     
@@ -54,10 +54,19 @@ enum RiskTheme: String, Codable, CaseIterable, Identifiable {
     
     static func infer(from text: String) -> RiskTheme {
         let lower = text.lowercased()
-        let moneyKeys = ["money", "cash", "invest", "stock", "market", "debt", "bank", "salary", "rent", "price", "loss", "finance", "portfolio", "crypto"]
-        let workKeys = ["job", "work", "boss", "client", "career", "layoff", "freelance", "business", "startup", "office"]
-        let healthKeys = ["health", "sick", "hospital", "doctor", "injury", "mental", "burnout", "illness"]
-        let relationshipKeys = ["partner", "spouse", "family", "friend", "relationship", "divorce", "breakup", "kids"]
+        // English plus the app's other languages (de, es, fr, it).
+        let moneyKeys = ["money", "cash", "invest", "stock", "market", "debt", "bank", "salary", "rent", "price", "loss", "finance", "portfolio", "crypto",
+                         "geld", "aktie", "schulden", "miete", "gehalt", "dinero", "deuda", "banco", "alquiler", "sueldo", "bolsa",
+                         "argent", "dette", "banque", "loyer", "salaire", "bourse", "soldi", "debito", "banca", "affitto", "stipendio", "borsa", "mercato"]
+        let workKeys = ["job", "work", "boss", "client", "career", "layoff", "freelance", "business", "startup", "office",
+                        "arbeit", "chef", "kunde", "kündigung", "trabajo", "jefe", "cliente", "despido", "empresa",
+                        "travail", "patron", "emploi", "licenciement", "entreprise", "lavoro", "capo", "licenziamento", "azienda", "ufficio"]
+        let healthKeys = ["health", "sick", "hospital", "doctor", "injury", "mental", "burnout", "illness",
+                          "gesundheit", "krank", "arzt", "krankenhaus", "salud", "enfermo", "médico", "lesión",
+                          "santé", "malade", "hôpital", "médecin", "blessure", "salute", "malato", "ospedale", "medico", "infortunio"]
+        let relationshipKeys = ["partner", "spouse", "family", "friend", "relationship", "divorce", "breakup", "kids",
+                                "familie", "freund", "scheidung", "kinder", "pareja", "familia", "amigo", "divorcio", "hijos",
+                                "famille", "amie", "divorce", "enfants", "couple", "famiglia", "amico", "divorzio", "figli", "compagno"]
         
         func score(_ keys: [String]) -> Int {
             keys.reduce(0) { $0 + (lower.contains($1) ? 1 : 0) }

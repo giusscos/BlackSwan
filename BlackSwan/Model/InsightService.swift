@@ -52,14 +52,14 @@ enum InsightService {
         let theme = RiskTheme.infer(from: text)
         guard classification == .blackSwan || probability < 60 else {
             return EventInsight(
-                explanation: "This looks like a foreseeable or chosen risk.",
+                explanation: String(localized: "This looks like a foreseeable or chosen risk."),
                 mitigations: [],
                 theme: theme
             )
         }
         
         return EventInsight(
-            explanation: "This may be a high-impact surprise. Build buffers so one shock cannot wipe you out.",
+            explanation: String(localized: "This may be a high-impact surprise. Build buffers so one shock cannot wipe you out."),
             mitigations: defaultMitigations(for: theme),
             theme: theme
         )
@@ -74,7 +74,7 @@ enum InsightService {
         
         let theme = RiskTheme.infer(from: worry)
         return PreMortemPlan(
-            scenario: "If “\(worry)” hit hard next month, the damage would come from lack of buffers and single points of failure.",
+            scenario: String(localized: "If “\(worry)” hit hard next month, the damage would come from lack of buffers and single points of failure."),
             buffers: defaultMitigations(for: theme),
             theme: theme
         )
@@ -99,13 +99,13 @@ enum InsightService {
             }
         }
         
-        let themeName = topTheme?.displayString ?? "overall exposure"
+        let themeName = topTheme?.displayString ?? String(localized: "overall exposure")
         return WeeklyReviewSummary(
-            headline: "This week: \(blackSwanCount) Black Swan\(blackSwanCount == 1 ? "" : "s"), \(deliberateCount) deliberate.",
-            focus: "Reduce fragility in \(themeName). Close \(max(openActions, 1)) open mitigation\(openActions == 1 ? "" : "s").",
+            headline: String(localized: "This week: Black Swans \(blackSwanCount), deliberate \(deliberateCount)."),
+            focus: String(localized: "Reduce fragility in \(themeName). Open mitigations to close: \(max(openActions, 1))."),
             wins: completedActions > 0
-                ? ["You completed \(completedActions) protective action\(completedActions == 1 ? "" : "s")."]
-                : ["You logged events — awareness is the first buffer."]
+                ? [String(localized: "Protective actions completed: \(completedActions).")]
+                : [String(localized: "You logged events — awareness is the first buffer.")]
         )
     }
     
@@ -113,33 +113,33 @@ enum InsightService {
         switch theme {
         case .money:
             return [
-                "Keep 3–6 months of expenses in a separate cash buffer",
-                "Cap any single investment or income source at a fixed % of net worth / income",
-                "Write a one-page plan for a 30% income drop"
+                String(localized: "Keep 3–6 months of expenses in a separate cash buffer"),
+                String(localized: "Cap any single investment or income source at a fixed % of net worth / income"),
+                String(localized: "Write a one-page plan for a 30% income drop")
             ]
         case .work:
             return [
-                "Document key processes so one person is not a single point of failure",
-                "Warm two backup clients, roles, or income paths this month",
-                "Set a hard limit on concentration in one employer or client"
+                String(localized: "Document key processes so one person is not a single point of failure"),
+                String(localized: "Warm two backup clients, roles, or income paths this month"),
+                String(localized: "Set a hard limit on concentration in one employer or client")
             ]
         case .health:
             return [
-                "Book the deferred checkup or specialist visit",
-                "Build a 2-week recovery buffer in your calendar and finances",
-                "Identify one stress load you can cut for 30 days"
+                String(localized: "Book the deferred checkup or specialist visit"),
+                String(localized: "Build a 2-week recovery buffer in your calendar and finances"),
+                String(localized: "Identify one stress load you can cut for 30 days")
             ]
         case .relationships:
             return [
-                "Have one honest conversation about the fragile spot",
-                "Reduce dependence on a single relationship for support or housing",
-                "Schedule a recurring check-in before the next crisis"
+                String(localized: "Have one honest conversation about the fragile spot"),
+                String(localized: "Reduce dependence on a single relationship for support or housing"),
+                String(localized: "Schedule a recurring check-in before the next crisis")
             ]
         case .other:
             return [
-                "Name the worst realistic downside in one sentence",
-                "Add one redundant option (backup plan, spare resource, exit path)",
-                "Shrink exposure so the same shock hurts less next time"
+                String(localized: "Name the worst realistic downside in one sentence"),
+                String(localized: "Add one redundant option (backup plan, spare resource, exit path)"),
+                String(localized: "Shrink exposure so the same shock hurts less next time")
             ]
         }
     }
@@ -198,6 +198,13 @@ enum FoundationInsightBackend {
         }
     }
     
+    /// The model replies in English unless told otherwise; theme keys stay English for `mapTheme`.
+    private static var languageInstruction: String {
+        let code = Locale.current.language.languageCode?.identifier ?? "en"
+        let name = Locale(identifier: "en").localizedString(forLanguageCode: code) ?? "English"
+        return "Write every sentence in \(name). Keep the theme value as one of the English words listed."
+    }
+    
     private static func mapTheme(_ raw: String) -> RiskTheme {
         RiskTheme(rawValue: raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()) ?? .other
     }
@@ -213,7 +220,7 @@ enum FoundationInsightBackend {
             You help people understand rare, high-impact "Black Swan" events versus deliberate, \
             foreseeable risks. Be concise, practical, and calm. Do not invent facts that are not \
             in the event text. Do not contradict the provided classification. Theme must be one of: \
-            money, work, health, relationships, other.
+            money, work, health, relationships, other. \(languageInstruction)
             """)
         
         let prompt = """
@@ -254,7 +261,7 @@ enum FoundationInsightBackend {
         let session = LanguageModelSession(instructions: """
             You run pre-mortems: imagine a worry has already become a painful surprise, then propose \
             practical buffers. Be concrete and calm. Theme must be one of: money, work, health, \
-            relationships, other.
+            relationships, other. \(languageInstruction)
             """)
         
         let prompt = """
@@ -296,7 +303,7 @@ enum FoundationInsightBackend {
         guard isAvailable else { return nil }
         
         let session = LanguageModelSession(instructions: """
-            You write short weekly fragility reviews. Encouraging, practical, no fluff.
+            You write short weekly fragility reviews. Encouraging, practical, no fluff. \(languageInstruction)
             """)
         
         let prompt = """

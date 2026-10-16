@@ -48,7 +48,7 @@ struct FragilitySnapshot: Equatable {
         topTheme: nil,
         themeStats: [],
         recentWeeks: [],
-        summaryLine: "Log a few events to see where you’re fragile."
+        summaryLine: String(localized: "Log a few events to see where you’re fragile.")
     )
 }
 
@@ -100,11 +100,11 @@ enum FragilityAnalytics {
         
         let summary: String
         if events.count < 3 {
-            summary = "Keep logging — patterns get useful after a handful of events."
+            summary = String(localized: "Keep logging — patterns get useful after a handful of events.")
         } else if let topTheme {
-            summary = "Most exposure sits in \(topTheme.displayString). \(open) mitigation\(open == 1 ? "" : "s") still open."
+            summary = String(localized: "Most exposure sits in \(topTheme.displayString). Open mitigations: \(open).")
         } else {
-            summary = "\(blackSwans.count) Black Swan\(blackSwans.count == 1 ? "" : "s") logged. Close open mitigations to lower fragility."
+            summary = String(localized: "Black Swans logged: \(blackSwans.count). Close open mitigations to lower fragility.")
         }
         
         return FragilitySnapshot(

@@ -1,0 +1,7 @@
+build/
+.DS_Store
+
+# Screenshot captures and rendered slides: regenerate with metadata/<version>/capture.sh and make_byjo.py
+metadata/*/raw/
+metadata/*/byjo/
+metadata/localization/__pycache__/

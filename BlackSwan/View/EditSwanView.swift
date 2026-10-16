@@ -60,7 +60,7 @@ struct EditSwanView: View {
                 }
             }
             .padding()
-            .navigationTitle(swan != nil ? "Edit event" : "Create event")
+            .navigationTitle(swan != nil ? Text("Edit event") : Text("Create event"))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {

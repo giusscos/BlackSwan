@@ -28,12 +28,12 @@ struct ChecklistRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(item.isDone ? "Completed: \(item.text)" : "Mark done: \(item.text)")
+        .accessibilityLabel(item.isDone ? Text("Completed: \(item.text)") : Text("Mark done: \(item.text)"))
     }
 }
 
 struct SectionCard<Content: View>: View {
-    let title: String
+    let title: LocalizedStringKey
     @ViewBuilder var content: Content
     
     var body: some View {

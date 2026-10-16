@@ -71,7 +71,7 @@ struct InsightsView: View {
                 
                 if snapshot.openActions > 0 {
                     SectionCard(title: "Open protections") {
-                        Text("\(snapshot.openActions) mitigation\(snapshot.openActions == 1 ? "" : "s") still open across your events. Closing them lowers fragility.")
+                        Text("Open mitigations across your events: \(snapshot.openActions). Closing them lowers fragility.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -121,7 +121,7 @@ struct InsightsView: View {
         }
     }
     
-    private func statChip(title: String, value: String) -> some View {
+    private func statChip(title: LocalizedStringKey, value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(value)
                 .font(.title3.weight(.bold))
@@ -149,7 +149,7 @@ struct InsightsView: View {
         }
     }
     
-    private func legendDot(color: Color, title: String) -> some View {
+    private func legendDot(color: Color, title: LocalizedStringKey) -> some View {
         HStack(spacing: 6) {
             Circle().fill(color).frame(width: 8, height: 8)
             Text(title)

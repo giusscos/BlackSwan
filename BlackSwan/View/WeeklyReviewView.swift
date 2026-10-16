@@ -144,7 +144,7 @@ struct WeeklyReviewView: View {
         }
     }
     
-    private func weekChip(_ title: String, _ value: String) -> some View {
+    private func weekChip(_ title: LocalizedStringKey, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(value)
                 .font(.title3.weight(.bold))
