@@ -69,6 +69,6 @@ Title ≤ 16 characters (the orange line), subtitle ≤ 32. Capture: `raw/<devic
 | 1 | Be ready | for the next shock |
 | 2 | A plan | for every shock you log |
 | 3 | Fragility score | see where you're exposed |
-| 4 | Weekly review | five minutes, one clear focus |
+| 4 | Weekly review | five minutes, one focus |
 | 5 | Pre-mortems | plan before the hit |
-| 6 | Private | on your iPhone, no account |
+| 6 | Private | no account, no tracking |

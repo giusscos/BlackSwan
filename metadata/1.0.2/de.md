@@ -68,7 +68,7 @@ Title ≤ 16 characters (the orange line), subtitle ≤ 32. Capture: `raw/<devic
 |---|-------|----------|
 | 1 | Sei bereit | für den nächsten Schock |
 | 2 | Ein Plan | für jeden Schock |
-| 3 | Fragilität | sieh, wo du verwundbar bist |
-| 4 | Wochenrückblick | fünf Minuten, ein klarer Fokus |
+| 3 | Fragilität | deine Schwachstellen |
+| 4 | Rückblick | fünf Minuten, ein Fokus |
 | 5 | Pre-Mortems | plane vor dem Schlag |
-| 6 | Privat | auf deinem iPhone, ohne Konto |
+| 6 | Privat | kein Konto, kein Tracking |

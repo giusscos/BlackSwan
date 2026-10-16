@@ -135,7 +135,7 @@ python3 metadata/1.0.2/make_byjo.py
 
 ## Subscriptions
 
-> Done 2026-10-16: the 1-week free intro offer on Yearly is live (Upfront, 175 countries, no end date), and Billing Grace Period is on (16 days, all renewals, production + sandbox). Version 1.0.2 is created with the name, subtitle, promotional text, description, keywords, What's New and review notes below. German, Spanish (Spain), French and Italian localizations are added with name, subtitle, promotional text, description, keywords and What's New. Still to do: upload the screenshots and a 1.0.2 build.
+> Done 2026-10-16: the 1-week free intro offer on Yearly is live (Upfront, 175 countries, no end date), and Billing Grace Period is on (16 days, all renewals, production + sandbox). Version 1.0.2 is created with the name, subtitle, promotional text, description, keywords, What's New and review notes below. German, Spanish (Spain), French and Italian localizations are added with name, subtitle, promotional text, description, keywords and What's New. Subscription group and both plans are localized for de, es-ES, fr-FR and it (group: "Black Swan Vollzugriff" / "Acceso completo a Black Swan" / "Accès complet à Black Swan" / "Accesso completo a Black Swan"; plans: Jahreszugang/Wochenzugang, Acceso anual/semanal, Accès annuel/hebdomadaire, Accesso annuale/settimanale). They're in Prepare for Submission and go to review with 1.0.2. Still to do: upload the screenshots and a 1.0.2 build.
 
 | Product | ID | Price | Status | To do |
 |---|---|---|---|---|

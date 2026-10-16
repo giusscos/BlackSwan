@@ -69,6 +69,6 @@ Title ≤ 16 characters (the orange line), subtitle ≤ 32. Capture: `raw/<devic
 | 1 | Sois prêt | pour le prochain choc |
 | 2 | Un plan | pour chaque choc |
 | 3 | Fragilité | vois où tu es exposé |
-| 4 | Bilan hebdo | cinq minutes, un seul focus |
+| 4 | Bilan hebdo | cinq minutes, un focus |
 | 5 | Pré-mortems | anticipe avant le choc |
-| 6 | Privé | sur ton iPhone, sans compte |
+| 6 | Privé | sans compte ni pistage |

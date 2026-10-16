@@ -81,7 +81,7 @@ def slide(device: str, language: str, index: int, screen: str, title: str, subti
     width, height = spec["size"]
     canvas = Image.new("RGB", spec["size"], BACKGROUND)
     draw = ImageDraw.Draw(canvas)
-    margin = round(width * 0.06)
+    margin = 80 if device == "iphone" else 120
 
     title_font = fit(draw, title, spec["title"], "Bold", width - margin * 2)
     sub_font = fit(draw, subtitle, spec["subtitle"], "Semibold", width - margin * 2)
