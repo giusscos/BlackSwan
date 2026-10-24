@@ -123,7 +123,7 @@ Layout: `#EBEBEB` background, SF Compact Rounded Bold title in the icon's red, S
 | 3 | `fragility` | Score, theme breakdown, recent weeks |
 | 4 | `review` | Weekly review with the on-device summary |
 | 5 | `premortem` | Saved pre-mortem with buffers |
-| 6 | `demo` | Onboarding demo: a shock turning into a plan |
+| 6 | `paywall` | Paywall with the 1-week free trial timeline |
 
 **Rebuilding:**
 ```bash
@@ -131,6 +131,8 @@ xcodebuild -project BlackSwan.xcodeproj -scheme BlackSwan -configuration Debug -
 metadata/1.0.2/capture.sh build/dd/Build/Products/Debug-iphonesimulator/BlackSwan.app
 python3 metadata/1.0.2/make_byjo.py
 ```
+On iPad, `ScreenshotHarness` adds extra sample content (a fuller plan and more pre-mortems) so the bigger screen doesn't look empty.
+
 `capture.sh` launches Debug builds with `-ScreenshotScreen <screen>` (see `ScreenshotHarness.swift`, compiled out of Release), which reseeds sample data in the current language and opens that screen directly. `ONLY=ipad` or `ONLY=iphone` re-runs one device.
 
 ## Subscriptions

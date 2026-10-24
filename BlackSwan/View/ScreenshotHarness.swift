@@ -73,6 +73,9 @@ struct ScreenshotHarness: View {
         try? modelContext.delete(model: Swan.self)
         try? modelContext.delete(model: PreMortem.self)
         MockData.insertSampleContent(into: modelContext)
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            MockData.insertTabletExtras(into: modelContext)
+        }
         try? modelContext.save()
         Tips.hideAllTipsForTesting()
         UserDefaults.standard.set(WhatsNewView.contentVersion, forKey: "lastSeenWhatsNewVersion")

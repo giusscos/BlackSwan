@@ -8,7 +8,7 @@ APP="$1"
 OUT="${0:A:h}/raw"
 BUNDLE="giusscos.BlackSwan"
 LANGUAGES=(en de es fr it)
-SCREENS=(home detail fragility review premortem demo)
+SCREENS=(${=SCREENS_OVERRIDE:-home detail fragility review premortem paywall})
 # name:UDID. iPhone 17 Pro and iPad Pro 11-inch (M5) match the device bezels in Figma.
 DEVICES=(iphone:F7939337-F961-48C8-9199-1CA8251CBB9B ipad:E7264D6D-1E4D-4EA5-BD86-C90464DE5E4E)
 

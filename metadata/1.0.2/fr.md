@@ -71,4 +71,4 @@ Title ≤ 16 characters (the orange line), subtitle ≤ 32. Capture: `raw/<devic
 | 3 | Fragilité | vois où tu es exposé |
 | 4 | Bilan hebdo | cinq minutes, un focus |
 | 5 | Pré-mortems | anticipe avant le choc |
-| 6 | Privé | sans compte ni pistage |
+| 6 | Essai gratuit | 1 semaine offerte |

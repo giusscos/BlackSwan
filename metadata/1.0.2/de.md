@@ -71,4 +71,4 @@ Title ≤ 16 characters (the orange line), subtitle ≤ 32. Capture: `raw/<devic
 | 3 | Fragilität | deine Schwachstellen |
 | 4 | Rückblick | fünf Minuten, ein Fokus |
 | 5 | Pre-Mortems | plane vor dem Schlag |
-| 6 | Privat | kein Konto, kein Tracking |
+| 6 | Gratis testen | 1 Woche, ohne Risiko |

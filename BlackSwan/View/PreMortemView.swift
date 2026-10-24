@@ -93,6 +93,9 @@ struct PreMortemView: View {
                 }
             }
             .padding(16)
+            // A readable column on iPad instead of lines stretched across the whole screen.
+            .frame(maxWidth: 720, alignment: .leading)
+            .frame(maxWidth: .infinity)
         }
         .navigationTitle("Pre-mortem")
         .onAppear {

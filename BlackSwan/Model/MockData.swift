@@ -152,4 +152,53 @@ enum MockData {
         ]
         context.insert(preMortem)
     }
+    
+    /// Extra sample content for iPad screenshots, where the bigger screen would otherwise look empty.
+    @MainActor
+    static func insertTabletExtras(into context: ModelContext) {
+        let calendar = Calendar.current
+        let now = Date()
+        
+        let events = (try? context.fetch(FetchDescriptor<Swan>(sortBy: [SortDescriptor(\.timestamp, order: .reverse)]))) ?? []
+        if let latest = events.first {
+            latest.explanation = String(localized: "An abrupt income shock from concentration in a single client. One decision outside your control removed most of next month's revenue, and there was no buffer to absorb it.")
+            latest.mitigationItems += [
+                MitigationItem(text: String(localized: "Ask for 50% upfront on new projects"), isDone: true),
+                MitigationItem(text: String(localized: "Set an alert when cash drops below 60 days of costs"), isDone: false)
+            ]
+        }
+        
+        let plans = (try? context.fetch(FetchDescriptor<PreMortem>())) ?? []
+        plans.first?.bufferItems += [
+            MitigationItem(text: String(localized: "Agree a 60-day notice clause with every client"), isDone: false),
+            MitigationItem(text: String(localized: "Cut fixed costs that don't earn their keep"), isDone: true)
+        ]
+        
+        let extras: [(daysAgo: Int, worry: String, theme: RiskTheme, scenario: String, buffers: [(String, Bool)])] = [
+            (
+                9,
+                String(localized: "A health issue keeps me from working for six weeks"),
+                .health,
+                String(localized: "Six weeks without income while bills keep coming, and no one who can cover your work."),
+                [(String(localized: "Check what your insurance pays if you can't work"), false),
+                 (String(localized: "Write down who could cover your clients"), true)]
+            ),
+            (
+                21,
+                String(localized: "My rent goes up 25% at renewal"),
+                .money,
+                String(localized: "A sudden jump in your biggest fixed cost squeezes savings and forces a rushed move."),
+                [(String(localized: "Know the cheapest place you'd move to"), false),
+                 (String(localized: "Save the difference for three months now"), false)]
+            )
+        ]
+        for extra in extras {
+            let plan = PreMortem(worry: extra.worry)
+            plan.timestamp = calendar.date(byAdding: .day, value: -extra.daysAgo, to: now) ?? now
+            plan.theme = extra.theme
+            plan.scenario = extra.scenario
+            plan.bufferItems = extra.buffers.map { MitigationItem(text: $0.0, isDone: $0.1) }
+            context.insert(plan)
+        }
+    }
 }

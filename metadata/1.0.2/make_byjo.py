@@ -22,7 +22,7 @@ SUBTITLE = (28, 28, 30)
 BEZEL = (22, 22, 24)
 
 LANGUAGES = ["en", "de", "es", "fr", "it"]
-SCREENS = ["home", "detail", "fragility", "review", "premortem", "demo"]
+SCREENS = ["home", "detail", "fragility", "review", "premortem", "paywall"]
 
 # Canvas sizes App Store Connect accepts: 6.9" iPhone and 13" iPad.
 DEVICES = {

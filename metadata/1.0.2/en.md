@@ -71,4 +71,4 @@ Title ≤ 16 characters (the orange line), subtitle ≤ 32. Capture: `raw/<devic
 | 3 | Fragility score | see where you're exposed |
 | 4 | Weekly review | five minutes, one focus |
 | 5 | Pre-mortems | plan before the hit |
-| 6 | Private | no account, no tracking |
+| 6 | Try it free | 1 week, cancel anytime |

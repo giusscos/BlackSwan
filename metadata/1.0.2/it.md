@@ -71,4 +71,4 @@ Title ≤ 16 characters (the orange line), subtitle ≤ 32. Capture: `raw/<devic
 | 3 | Fragilità | vedi dove sei esposto |
 | 4 | Revisione | cinque minuti a settimana |
 | 5 | Pre-mortem | pianifica prima del colpo |
-| 6 | Privato | solo sul tuo iPhone |
+| 6 | Provalo gratis | 7 giorni senza vincoli |

@@ -80,7 +80,9 @@ struct SwanDetailsView: View {
                     .foregroundStyle(.secondary)
             }
             .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            // A readable column on iPad instead of lines stretched across the whole screen.
+            .frame(maxWidth: 720, alignment: .leading)
+            .frame(maxWidth: .infinity)
         }
         .navigationTitle(swan.classification.displayString)
         .fullScreenCover(isPresented: $showingEditSheet) {
